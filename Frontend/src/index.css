@@ -1,0 +1,15 @@
+@import "tailwindcss";
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gradient tło i pełna wysokość/szerokość */
+body,
+#root {
+  @apply min-h-screen min-w-full flex flex-col bg-gradient-to-br from-[#edf1d6] to-[#609966];
+}

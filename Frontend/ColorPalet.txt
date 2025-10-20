@@ -1,0 +1,4 @@
+Tło	            #EDF1D6
+Główne	        #9DC08B
+Akcenty	        #609966
+Tekst/kontrast	#40513B
