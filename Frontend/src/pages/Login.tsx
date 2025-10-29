@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "@/lib/axios"; // Twój axios
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,8 +10,37 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import type { TokenResponse } from "@/interface/TokenResponse";
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  console.log(import.meta.env.VITE_API_URL);
+  const handleLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
+
+      const data = await api.post<TokenResponse>("/users/login", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+
+      localStorage.setItem("token", data.access_token);
+      navigate("/main"); // przekierowanie po zalogowaniu
+    } catch (err) {
+      setError("Nieprawidłowy login lub hasło");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden">
       <div
@@ -17,10 +48,8 @@ const Login: React.FC = () => {
         style={{ transform: "rotate(-47deg)", left: "25px", opacity: 0.6 }}
       />
 
-      {/* Karta logowania */}
       <Card className="relative z-20 w-[360px] shadow-md bg-white border border-main/30 rounded-2xl">
         <CardHeader>
-          {/* Tytuł z liniami */}
           <div className="flex items-center justify-center w-full">
             <div className="grow h-[2px] bg-main mr-3" />
             <h2 className="text-2xl font-bold text-gray-800 whitespace-nowrap">
@@ -32,13 +61,15 @@ const Login: React.FC = () => {
 
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="email" className="text-gray-700">
-              Email
+            <Label htmlFor="username" className="text-gray-700">
+              Username
             </Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="example@mail.com"
+              id="username"
+              type="text"
+              placeholder="Twój login"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
             />
           </div>
@@ -51,18 +82,27 @@ const Login: React.FC = () => {
               id="password"
               type="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
             />
           </div>
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-3">
-          <Button className="w-full bg-main text-white hover:bg-main/90 transition-colors">
-            Zaloguj się
+          <Button
+            className="w-full bg-main text-white hover:bg-main/90 transition-colors"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Logowanie..." : "Zaloguj się"}
           </Button>
           <Button
             variant="outline"
             className="w-full border-main text-main hover:bg-main/10"
+            onClick={() => navigate("/register")}
           >
             Utwórz konto
           </Button>
