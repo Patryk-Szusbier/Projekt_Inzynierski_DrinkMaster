@@ -17,7 +17,7 @@ body {
   width: 800px;
   height: 480px;
   overflow: hidden;
-  @apply flex flex-col bg-linear-to-br from-back to-accent;
+  @apply flex flex-col bg-linear-to-br from-back to-[#eefada];
 }
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
