@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 import enum
 
-# Reużyj tych samych nazw enumów w schematach (możesz też importować z models jeśli wolisz)
+# --- Enums ---
 class RoleEnum(str, enum.Enum):
     ADMIN = "ADMIN"
     USER = "USER"
@@ -31,7 +31,7 @@ class UserOut(BaseModel):
     role: RoleEnum
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -47,7 +47,7 @@ class AlcoholBase(BaseModel):
 class AlcoholOut(AlcoholBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MixerBase(BaseModel):
     name: str
@@ -58,7 +58,7 @@ class MixerBase(BaseModel):
 class MixerOut(MixerBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Drink & Ingredient ---
 class DrinkIngredientIn(BaseModel):
@@ -67,6 +67,13 @@ class DrinkIngredientIn(BaseModel):
     amount_ml: int
     order_index: Optional[int] = None
     note: Optional[str] = None
+
+class DrinkIngredientOut(DrinkIngredientIn):
+    id: int
+    drink_id: int
+
+    class Config:
+        from_attributes = True
 
 class DrinkCreate(BaseModel):
     name: str
@@ -82,16 +89,10 @@ class DrinkOut(BaseModel):
     is_public: bool
     image_url: Optional[str]
     author_id: Optional[int]
+    ingredients: List[DrinkIngredientOut] = []  # <-- powiązanie składników
 
     class Config:
-        orm_mode = True
-
-class DrinkIngredientOut(DrinkIngredientIn):
-    id: int
-    drink_id: int
-
-    class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Machine ---
 class MachineSlotOut(BaseModel):
@@ -103,7 +104,7 @@ class MachineSlotOut(BaseModel):
     active: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MachineFillerOut(BaseModel):
     id: int
@@ -113,4 +114,4 @@ class MachineFillerOut(BaseModel):
     active: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True

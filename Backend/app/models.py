@@ -60,6 +60,11 @@ class Drink(Base):
     image_url = Column(Text)
 
     author = relationship("User")
+    ingredients = relationship(
+        "DrinkIngredient",
+        back_populates="drink",
+        cascade="all, delete-orphan"
+    )
 
 
 class DrinkIngredient(Base):
@@ -71,6 +76,9 @@ class DrinkIngredient(Base):
     amount_ml = Column(Integer, nullable=False)
     order_index = Column(Integer)
     note = Column(Text)
+
+    drink = relationship("Drink", back_populates="ingredients")
+
 
 
 class FavoriteDrink(Base):
