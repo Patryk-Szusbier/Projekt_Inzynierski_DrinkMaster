@@ -3,6 +3,8 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MainMenu from "./pages/MainMenu";
+import MachineSlots from "./pages/Options/MachineSlots";
+import DefaultLayout from "./pages/Default/DefaultLayout";
 
 // Funkcja sprawdzająca, czy użytkownik jest zalogowany
 const isLoggedIn = () => !!localStorage.getItem("token");
@@ -29,9 +31,11 @@ const RoutesConfig = () => {
 
         {/* Chronione strony */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/main" element={<MainMenu username="Jan Kowalski" />} />
+          <Route element={<DefaultLayout />}>
+            <Route path="/main" element={<MainMenu />} />
+            <Route path="/main/option" element={<MachineSlots />} />
+          </Route>
         </Route>
-
         {/* Domyślne przekierowanie */}
         <Route
           path="*"

@@ -89,22 +89,23 @@ class DrinkOut(BaseModel):
     is_public: bool
     image_url: Optional[str]
     author_id: Optional[int]
-    ingredients: List[DrinkIngredientOut] = []  # <-- powiązanie składników
+    ingredients: List[DrinkIngredientOut] = [] 
 
     class Config:
         from_attributes = True
 
 # --- Machine ---
 class MachineSlotOut(BaseModel):
-    id: int
-    slot_number: int
+    id: Optional[int] = None
+    slot_number: Optional[int] = None
     ingredient_type: IngredientType
     ingredient_id: int
-    volume_ml: Optional[int]
-    active: bool
+    volume_ml: Optional[int] = 0
+    active: bool = True
 
     class Config:
         from_attributes = True
+
 
 class MachineFillerOut(BaseModel):
     id: int

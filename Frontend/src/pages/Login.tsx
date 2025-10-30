@@ -10,7 +10,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import type { TokenResponse } from "@/interface/TokenResponse";
+import type { TokenResponse } from "@/interface/ITokenResponse";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  console.log(import.meta.env.VITE_API_URL);
   const handleLogin = async () => {
     setLoading(true);
     setError("");

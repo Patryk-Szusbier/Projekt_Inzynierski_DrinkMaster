@@ -55,9 +55,18 @@ VALUES
 -- -------------------------------
 INSERT INTO machine_slots (slot_number, ingredient_type, ingredient_id, volume_ml, active, note)
 VALUES
-(1, 'alcohol', 1, 1000, true, 'Rum slot'),
-(2, 'alcohol', 2, 500, true, 'Whisky slot'),
-(3, 'mixer', 3, 1000, true, 'Syrop malinowy slot');
+  (1, 'alcohol', 1, 1000, true, 'Rum slot'),
+  (2, 'alcohol', 2, 500, true, 'Whisky slot'),
+  (3, 'mixer', 3, 1000, true, 'Syrop malinowy slot'),
+  (4, 'mixer', 0, 0, false, 'Empty slot'),
+  (5, 'mixer', 0, 0, false, 'Empty slot'),
+  (6, 'mixer', 0, 0, false, 'Empty slot'),
+  (7, 'mixer', 0, 0, false, 'Mixer slot 7'),
+  (8, 'mixer', 0, 0, false, 'Mixer slot 8'),
+  (9, 'mixer', 0, 0, false, 'Mixer slot 9'),
+  (10,'mixer', 0, 0, false, 'Mixer slot 10')
+ON CONFLICT (slot_number) DO NOTHING;
+
 
 -- -------------------------------
 -- MACHINE FILLERS (NAPOJE)
