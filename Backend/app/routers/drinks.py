@@ -51,39 +51,6 @@ def list_public_drinks(db: Session = Depends(get_db)):
     )
     return drinks
 
-
-# --- Pobranie konkretnego drinka ---
-@router.get("/{drink_id}", response_model=schemas.DrinkOut)
-def get_drink(drink_id: int, db: Session = Depends(get_db)):
-    drink = (
-        db.query(models.Drink)
-        .options(joinedload(models.Drink.ingredients))
-        .filter(models.Drink.id == drink_id)
-        .first()
-    )
-    if not drink:
-        raise HTTPException(status_code=404, detail="Drink not found")
-    return drink
-
-
-# --- Usuwanie drinka ---
-@router.delete("/{drink_id}")
-def delete_drink(
-    drink_id: int,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
-):
-    drink = db.query(models.Drink).filter(models.Drink.id == drink_id).first()
-    if not drink:
-        raise HTTPException(status_code=404, detail="Not found")
-    if drink.author_id != current_user.id and current_user.role != models.RoleEnum.ADMIN:
-        raise HTTPException(status_code=403, detail="Not permitted")
-
-    db.delete(drink)
-    db.commit()
-    return {"detail": "deleted"}
-
-
 # --- Lista drinków, które da się przygotować na podstawie aktywnych składników ---
 @router.get("/available", response_model=List[schemas.DrinkOut])
 def list_available_drinks(db: Session = Depends(get_db)):
@@ -123,3 +90,34 @@ def list_available_drinks(db: Session = Depends(get_db)):
             available_drinks.append(drink)
 
     return available_drinks
+
+# --- Pobranie konkretnego drinka ---
+@router.get("/{drink_id}", response_model=schemas.DrinkOut)
+def get_drink(drink_id: int, db: Session = Depends(get_db)):
+    drink = (
+        db.query(models.Drink)
+        .options(joinedload(models.Drink.ingredients))
+        .filter(models.Drink.id == drink_id)
+        .first()
+    )
+    if not drink:
+        raise HTTPException(status_code=404, detail="Drink not found")
+    return drink
+
+
+# --- Usuwanie drinka ---
+@router.delete("/{drink_id}")
+def delete_drink(
+    drink_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    drink = db.query(models.Drink).filter(models.Drink.id == drink_id).first()
+    if not drink:
+        raise HTTPException(status_code=404, detail="Not found")
+    if drink.author_id != current_user.id and current_user.role != models.RoleEnum.ADMIN:
+        raise HTTPException(status_code=403, detail="Not permitted")
+
+    db.delete(drink)
+    db.commit()
+    return {"detail": "deleted"}

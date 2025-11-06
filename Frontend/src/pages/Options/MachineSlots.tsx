@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Ingredient } from "@/interface/IIngredientl";
+import type { Ingredient } from "@/interface/IDrink";
 import type { Slot } from "@/interface/ISlot";
 
 const MachineSlots: React.FC = () => {

@@ -7,7 +7,7 @@ import api from "@/lib/axios";
 import type { User } from "@/interface/IUser";
 
 const tiles = [
-  { label: "Menu", emoji: "🍹", path: "/main" },
+  { label: "Menu", emoji: "🍹", path: "/main/drinks" },
   { label: "Opcje", emoji: "⚙️", path: "/main/option" },
   { label: "Dodaj", emoji: "➕", path: "/main/add" },
 ];

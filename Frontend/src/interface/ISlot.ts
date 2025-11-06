@@ -1,7 +1,10 @@
-export interface Slot {
+import type { IngredientType } from "./IDrink";
+
+export interface MachineSlot {
+  id: number;
   slot_number: number;
-  ingredient_type: "alcohol" | "mixer" | null;
-  ingredient_id: number | null;
+  ingredient_type: IngredientType;
+  ingredient_id: number;
   volume_ml: number;
   active: boolean;
 }

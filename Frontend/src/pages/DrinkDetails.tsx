@@ -1,26 +1,37 @@
 import { Button } from "@/components/ui/button";
 import Photos from "../assets/margarita.jpg";
+import type { Drink } from "@/interface/IDrink";
+import { useLocation, useNavigate } from "react-router-dom";
 
-interface DrinkDetailsProps {
-  name: string;
-  ingredients: string[];
-}
+const DrinkDetails: React.FC = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const drink: Drink | undefined = state?.drink;
 
-const DrinkDetails: React.FC<DrinkDetailsProps> = ({ name, ingredients }) => {
+  if (!drink) {
+    return (
+      <div className="text-center text-contrast font-medium mt-20">
+        Nie znaleziono danych drinka 🥺
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Tło - zdjęcie z przycięciem */}
-      <div
-        className="absolute w-full h-full"
-        style={{
-          backgroundImage: `url(${Photos})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center center",
-          transform: "translateX(-25%)",
-          clipPath: "polygon(0 0, 93% 0, 37% 100%, 0% 100%)",
-          zIndex: 10,
-        }}
-      />
+      <div className="relative w-full max-w-[800px] aspect-5/3">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${drink.image_url || Photos})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            clipPath: "polygon(0 0, 93% 0, 37% 100%, 0% 100%)",
+            transform: "translateX(-25%)",
+            zIndex: 10,
+          }}
+        />
+      </div>
 
       {/* Skośna linia */}
       <div className="absolute left-25 bottom-0 w-[800px] h-[3px] bg-main rotate-313 origin-bottom-left z-20" />
@@ -31,7 +42,7 @@ const DrinkDetails: React.FC<DrinkDetailsProps> = ({ name, ingredients }) => {
         <div className="flex items-center justify-center w-full">
           <div className="grow h-[2px] bg-main mr-3" />
           <span className="text-lg font-semibold whitespace-nowrap text-center">
-            {name}
+            {drink.name}
           </span>
           <div className="grow h-[2px] bg-main ml-3" />
         </div>
@@ -39,15 +50,20 @@ const DrinkDetails: React.FC<DrinkDetailsProps> = ({ name, ingredients }) => {
         {/* Skład */}
         <div className="text-base mt-4 font-medium text-center">Skład:</div>
         <ul className="list-none space-y-1 text-gray-700 text-left">
-          {ingredients.map((item, index) => (
-            <li key={index}> {item}</li>
+          {drink.ingredients.map((item, i) => (
+            <li key={i}>
+              <b>{item.note}</b> – {item.amount_ml}
+              ml
+            </li>
           ))}
         </ul>
       </div>
 
-      {/* Przycisk w prawym dolnym rogu */}
-      <div className="absolute bottom-8 right-12 z-30">
-        <Button variant="outline">Miksuj</Button>
+      {/* Przycisk */}
+      <div className="absolute bottom-24 right-12 z-30">
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          Miksuj
+        </Button>
       </div>
     </>
   );

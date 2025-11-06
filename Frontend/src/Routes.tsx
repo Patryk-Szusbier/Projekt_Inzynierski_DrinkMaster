@@ -5,6 +5,8 @@ import Register from "./pages/Register";
 import MainMenu from "./pages/MainMenu";
 import MachineSlots from "./pages/Options/MachineSlots";
 import DefaultLayout from "./pages/Default/DefaultLayout";
+import DrinkMenu from "./pages/DrinkMenu";
+import DrinkDetails from "./pages/DrinkDetails";
 
 // Funkcja sprawdzająca, czy użytkownik jest zalogowany
 const isLoggedIn = () => !!localStorage.getItem("token");
@@ -31,9 +33,11 @@ const RoutesConfig = () => {
 
         {/* Chronione strony */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<DefaultLayout />}>
-            <Route path="/main" element={<MainMenu />} />
-            <Route path="/main/option" element={<MachineSlots />} />
+          <Route path="/main" element={<DefaultLayout />}>
+            <Route index element={<MainMenu />} />
+            <Route path="option" element={<MachineSlots />} />
+            <Route path="drinks" element={<DrinkMenu />} />
+            <Route path="drinks/:id" element={<DrinkDetails />} />
           </Route>
         </Route>
         {/* Domyślne przekierowanie */}
