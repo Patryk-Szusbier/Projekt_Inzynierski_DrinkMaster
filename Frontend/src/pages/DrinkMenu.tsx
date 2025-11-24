@@ -47,29 +47,28 @@ const DrinkMenu: React.FC = () => {
     }
   };
 
-  // Filtruj drinki jeśli aktywny filtr ulubionych
   const filteredDrinks = showFavorites
     ? drinks.filter((d) => favorites.includes(d.id))
     : drinks;
 
   if (loading) {
     return (
-      <div className="grid grid-cols-3 gap-6 p-8">
+      <div className="grid grid-cols-3 gap-10 p-12">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="w-full h-[250px] rounded-2xl" />
+          <Skeleton key={i} className="w-full h-[300px] rounded-3xl" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="p-10">
+    <div className="p-12">
       {/* Pasek z przyciskiem */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-contrast">Menu drinków</h1>
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-3xl font-semibold text-contrast">Menu drinków</h1>
         <Button
           variant="outline"
-          className="text-contrast border-contrast bg-white/40 hover:text-white"
+          className="text-contrast border-contrast bg-white/40 hover:text-white px-4 py-2 text-lg"
           onClick={() => setShowFavorites((prev) => !prev)}
         >
           {showFavorites ? "Wszystkie" : "Ulubione ❤️"}
@@ -77,15 +76,15 @@ const DrinkMenu: React.FC = () => {
       </div>
 
       {/* Lista drinków */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {filteredDrinks.map((drink) => (
           <div
             key={drink.id}
             onClick={() =>
               navigate(`/main/drinks/${drink.id}`, { state: { drink } })
             }
-            className="relative h-[250px] rounded-2xl overflow-hidden shadow-md 
-            cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:shadow-lg"
+            className="relative h-[300px] rounded-3xl overflow-hidden shadow-lg 
+            cursor-pointer transition-transform duration-300 hover:scale-[1.05] hover:shadow-2xl"
           >
             {/* Zdjęcie */}
             <div
@@ -98,16 +97,13 @@ const DrinkMenu: React.FC = () => {
             />
 
             {/* Overlay */}
-            <div
-              className="absolute inset-0 bg-black bg-opacity-30 
-              hover:bg-opacity-40 transition-all duration-300"
-            />
+            <div className="absolute inset-0 bg-black bg-opacity-25 hover:bg-opacity-35 transition-all duration-300" />
 
             {/* Nazwa */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center z-20">
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-center z-20">
               <span
-                className="text-contrast text-xl font-semibold bg-white/80 px-4 py-1 
-                rounded-full shadow-sm backdrop-blur-sm"
+                className="text-contrast text-2xl font-semibold bg-white/80 px-5 py-2 
+                rounded-full shadow-md backdrop-blur-sm"
               >
                 {drink.name}
               </span>
@@ -119,10 +115,10 @@ const DrinkMenu: React.FC = () => {
                 e.stopPropagation();
                 toggleFavorite(drink.id);
               }}
-              className="absolute top-3 right-3 z-30"
+              className="absolute top-4 right-4 z-30"
             >
               <Heart
-                className={`w-7 h-7 transition-colors duration-300 ${
+                className={`w-8 h-8 transition-colors duration-300 ${
                   favorites.includes(drink.id)
                     ? "fill-red-500 text-red-500"
                     : "text-white opacity-70 hover:opacity-100"
@@ -133,7 +129,7 @@ const DrinkMenu: React.FC = () => {
         ))}
 
         {filteredDrinks.length === 0 && (
-          <div className="col-span-full text-center text-contrast font-medium">
+          <div className="col-span-full text-center text-contrast font-medium text-lg">
             {showFavorites
               ? "Nie masz jeszcze ulubionych drinków ❤️"
               : "Brak dostępnych drinków do wykonania 🍸"}

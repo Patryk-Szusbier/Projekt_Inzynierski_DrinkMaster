@@ -16,7 +16,7 @@ const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [active, setActive] = useState(false);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -69,11 +69,16 @@ const MainMenu: React.FC = () => {
           <motion.div
             key={item.label}
             whileTap={{ scale: 0.9 }}
-            className="w-48 h-48 border-2 border-contrast text-accent bg-main rounded-3xl 
-                       flex flex-col items-center justify-center 
-                       hover:bg-main/50 transition-all duration-50
-                       shadow-sm hover:shadow-md cursor-pointer select-none"
             onClick={() => navigate(item.path)}
+            onTouchStart={() => setActive(true)}
+            onTouchEnd={() => setActive(false)}
+            className={`
+             w-48 h-48 border-2 border-contrast text-accent bg-main rounded-3xl 
+             flex flex-col items-center justify-center
+             transition-all duration-50
+             shadow-sm cursor-pointer select-none
+             ${active ? "bg-main/50 shadow-md" : ""}
+           `}
           >
             <span className="text-4xl mb-2">{item.emoji}</span>
             <span className="text-lg font-semibold">{item.label}</span>

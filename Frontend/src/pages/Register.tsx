@@ -70,11 +70,11 @@ const Register: React.FC = () => {
       <Card className="relative z-20 w-[380px] shadow-md bg-white border border-main/30 rounded-2xl">
         <CardHeader>
           <div className="flex items-center justify-center w-full">
-            <div className="grow h-[2px] bg-main mr-3" />
+            <div className="grow h-0.5 bg-main mr-3" />
             <h2 className="text-2xl font-bold whitespace-nowrap">
               Rejestracja
             </h2>
-            <div className="grow h-[2px] bg-main ml-3" />
+            <div className="grow h-0.5 bg-main ml-3" />
           </div>
         </CardHeader>
 

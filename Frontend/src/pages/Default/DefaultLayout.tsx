@@ -10,7 +10,7 @@ const DefaultLayout: React.FC = () => {
     <div className="relative w-screen h-screen text-contrast overflow-hidden bg-linear-to-br from-back to-main">
       {/* Pasek z rozmytym tłem */}
       {!isMainRoute && (
-        <div className="fixed top-0 left-0 w-full h-16 bg-contrast/10 backdrop-blur-lg z-20 flex items-center px-4">
+        <div className="fixed top-0 left-0 w-full h-20 bg-contrast/10 backdrop-blur-lg z-20 flex items-center px-4">
           <BackButton />
         </div>
       )}

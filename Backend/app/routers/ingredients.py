@@ -1,16 +1,19 @@
-# backend/app/routers/ingredients.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from .. import models, schemas
 from ..database import get_db
 from .users import get_current_user
 
 router = APIRouter()
 
-# Alcohols
+# ------------------ ALCOHOLS ------------------
 @router.post("/alcohols", response_model=schemas.AlcoholOut)
-def create_alcohol(a: schemas.AlcoholBase, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def create_alcohol(
+    a: schemas.AlcoholBase,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     if current_user.role != models.RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
     obj = models.Alcohol(**a.dict())
@@ -20,12 +23,23 @@ def create_alcohol(a: schemas.AlcoholBase, db: Session = Depends(get_db), curren
     return obj
 
 @router.get("/alcohols", response_model=List[schemas.AlcoholOut])
-def list_alcohols(db: Session = Depends(get_db)):
-    return db.query(models.Alcohol).all()
+def list_alcohols(
+    ids: Optional[str] = Query(None, description="Comma-separated list of alcohol IDs"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Alcohol)
+    if ids:
+        id_list = [int(x) for x in ids.split(",") if x.isdigit()]
+        query = query.filter(models.Alcohol.id.in_(id_list))
+    return query.all()
 
-# Mixers
+# ------------------ MIXERS ------------------
 @router.post("/mixers", response_model=schemas.MixerOut)
-def create_mixer(m: schemas.MixerBase, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def create_mixer(
+    m: schemas.MixerBase,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     if current_user.role != models.RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
     obj = models.Mixer(**m.dict())
@@ -35,16 +49,27 @@ def create_mixer(m: schemas.MixerBase, db: Session = Depends(get_db), current_us
     return obj
 
 @router.get("/mixers", response_model=List[schemas.MixerOut])
-def list_mixers(db: Session = Depends(get_db)):
-    return db.query(models.Mixer).all()
+def list_mixers(
+    ids: Optional[str] = Query(None, description="Comma-separated list of mixer IDs"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Mixer)
+    if ids:
+        id_list = [int(x) for x in ids.split(",") if x.isdigit()]
+        query = query.filter(models.Mixer.id.in_(id_list))
+    return query.all()
 
-# Machine slots & fillers
+# ------------------ MACHINE SLOTS ------------------
 @router.get("/machine_slots", response_model=List[schemas.MachineSlotOut])
 def list_slots(db: Session = Depends(get_db)):
     return db.query(models.MachineSlot).all()
 
 @router.post("/machine_slots", response_model=schemas.MachineSlotOut)
-def create_slot(slot_in: schemas.MachineSlotOut, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def create_slot(
+    slot_in: schemas.MachineSlotOut,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     if current_user.role != models.RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
 
@@ -67,7 +92,12 @@ def create_slot(slot_in: schemas.MachineSlotOut, db: Session = Depends(get_db), 
     return obj
 
 @router.put("/machine_slots/{slot_number}", response_model=schemas.MachineSlotOut)
-def update_slot(slot_number: int, slot_in: schemas.MachineSlotOut, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def update_slot(
+    slot_number: int,
+    slot_in: schemas.MachineSlotOut,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     if current_user.role != models.RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
 

@@ -1,4 +1,3 @@
-// src/routes/Routes.tsx
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -23,9 +22,9 @@ const ProtectedRoute = () => {
 
 const RoutesConfig = () => {
   return (
-    <>
-      <Routes>
-        {/* Publiczne strony */}
+    <Routes>
+      <Route element={<DefaultLayout />}>
+        {/* Publiczne tylko dla niezalogowanych */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -40,13 +39,14 @@ const RoutesConfig = () => {
             <Route path="drinks/:id" element={<DrinkDetails />} />
           </Route>
         </Route>
+
         {/* Domyślne przekierowanie */}
         <Route
           path="*"
           element={<Navigate to={isLoggedIn() ? "/main" : "/login"} />}
         />
-      </Routes>
-    </>
+      </Route>
+    </Routes>
   );
 };
 

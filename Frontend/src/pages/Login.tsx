@@ -43,18 +43,18 @@ const Login: React.FC = () => {
   return (
     <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden">
       <div
-        className="absolute bottom-0 w-[800px] h-[3px] bg-main origin-bottom-left"
-        style={{ transform: "rotate(-47deg)", left: "25px", opacity: 0.6 }}
+        className="absolute bottom-0 w-screen h-[5px] bg-main origin-bottom-left"
+        style={{ transform: "rotate(-47deg)", left: "25vh", opacity: 0.5 }}
       />
 
       <Card className="relative z-20 w-[360px] shadow-md bg-white border border-main/30 rounded-2xl">
         <CardHeader>
           <div className="flex items-center justify-center w-full">
-            <div className="grow h-[2px] bg-main mr-3" />
+            <div className="grow h-0.5 bg-main mr-3" />
             <h2 className="text-2xl font-bold text-gray-800 whitespace-nowrap">
               Logowanie
             </h2>
-            <div className="grow h-[2px] bg-main ml-3" />
+            <div className="grow h-0.5 bg-main ml-3" />
           </div>
         </CardHeader>
 
