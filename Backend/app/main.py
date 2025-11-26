@@ -2,12 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .routers import users, drinks, ingredients, favorite_drinks
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="DrinkMachine API")
 
 
 Base.metadata.create_all(bind=engine)
 
+app.mount("/drinkPhotos", StaticFiles(directory="drinkPhotos"), name="drink_photos")
 
 origins = [
     "http://localhost:5173",  

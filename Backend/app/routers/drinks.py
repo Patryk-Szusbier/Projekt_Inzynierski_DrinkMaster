@@ -6,8 +6,25 @@ from typing import List, Optional
 from .. import models, schemas
 from ..database import get_db
 from .users import get_current_user
+from PIL import Image
+from io import BytesIO
 
-router = APIRouter(prefix="/drinks", tags=["Drinks"])
+router = APIRouter()
+
+def resize_to_1280x720(image: Image.Image):
+    target_size = (1280, 720)
+
+
+    image.thumbnail(target_size, Image.Resampling.LANCZOS)
+
+
+    new_image = Image.new("RGB", target_size, (0, 0, 0))
+
+    paste_x = (target_size[0] - image.width) // 2
+    paste_y = (target_size[1] - image.height) // 2
+    new_image.paste(image, (paste_x, paste_y))
+
+    return new_image
 
 # Folder do przechowywania zdjęć drinków
 DRINK_PHOTOS_DIR = "drinkPhotos"
@@ -26,12 +43,27 @@ async def create_drink(
     current_user: models.User = Depends(get_current_user)
 ):
     # zapis zdjęcia
+# zapis zdjęcia
     image_filename = None
     if image:
         image_filename = image.filename
         file_path = os.path.join(DRINK_PHOTOS_DIR, image_filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+
+        # wczytaj obraz do pamięci
+        original_bytes = await image.read()
+        img = Image.open(BytesIO(original_bytes))
+
+        # konwersja PNG z przezroczystością → RGB
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        # przeskaluj bez rozciągania
+        resized = resize_to_1280x720(img)
+
+        # zapisz
+        resized.save(file_path, format="JPEG")
+
+
 
     # Tworzenie drinka
     drink = models.Drink(

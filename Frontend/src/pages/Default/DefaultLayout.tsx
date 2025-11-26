@@ -7,16 +7,18 @@ const DefaultLayout: React.FC = () => {
   const isMainRoute = location.pathname === "/main";
 
   return (
-    <div className="relative w-screen h-screen text-contrast overflow-hidden bg-linear-to-br from-back to-main">
-      {/* Pasek z rozmytym tłem */}
+    <div className="relative w-screen h-screen text-contrast bg-linear-to-br from-back to-main">
       {!isMainRoute && (
         <div className="fixed top-0 left-0 w-full h-20 bg-contrast/10 backdrop-blur-lg z-20 flex items-center px-4">
           <BackButton />
         </div>
       )}
 
-      {/* Główna zawartość */}
-      <main className={`${!isMainRoute ? "pt-16" : ""} relative z-10`}>
+      <main
+        className={`${
+          !isMainRoute ? "pt-8" : ""
+        } relative z-10 overflow-y-auto max-h-screen`}
+      >
         <Outlet />
       </main>
     </div>

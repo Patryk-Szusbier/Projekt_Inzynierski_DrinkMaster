@@ -59,60 +59,90 @@ def list_mixers(
         query = query.filter(models.Mixer.id.in_(id_list))
     return query.all()
 
-# ------------------ MACHINE SLOTS ------------------
+# ---------------------------------------------------------
+#  MACHINE SLOTS 1–6 (ALCOHOL / MIXER)
+# ---------------------------------------------------------
+
 @router.get("/machine_slots", response_model=List[schemas.MachineSlotOut])
 def list_slots(db: Session = Depends(get_db)):
-    return db.query(models.MachineSlot).all()
+    return db.query(models.MachineSlot).order_by(models.MachineSlot.slot_number).all()
 
-@router.post("/machine_slots", response_model=schemas.MachineSlotOut)
-def create_slot(
-    slot_in: schemas.MachineSlotOut,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
-):
-    if current_user.role != models.RoleEnum.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin only")
-
-    if not (1 <= slot_in.slot_number <= 10):
-        raise HTTPException(status_code=400, detail="Slot number must be between 1 and 10")
-
-    if slot_in.slot_number > 6 and slot_in.ingredient_type != "mixer":
-        raise HTTPException(status_code=400, detail="Slots 7-10 are reserved for mixers")
-
-    obj = models.MachineSlot(
-        slot_number=slot_in.slot_number,
-        ingredient_type=slot_in.ingredient_type,
-        ingredient_id=slot_in.ingredient_id,
-        volume_ml=slot_in.volume_ml,
-        active=slot_in.active
-    )
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
 
 @router.put("/machine_slots/{slot_number}", response_model=schemas.MachineSlotOut)
 def update_slot(
     slot_number: int,
-    slot_in: schemas.MachineSlotOut,
+    payload: schemas.MachineSlotUpdate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     if current_user.role != models.RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
 
-    slot = db.query(models.MachineSlot).filter(models.MachineSlot.slot_number == slot_number).first()
+    if not (1 <= slot_number <= 6):
+        raise HTTPException(status_code=400, detail="Slots 1–6 only")
+
+    slot = db.query(models.MachineSlot).filter_by(slot_number=slot_number).first()
     if not slot:
         raise HTTPException(status_code=404, detail="Slot not found")
 
-    if slot_number > 6 and slot_in.ingredient_type != "mixer":
-        raise HTTPException(status_code=400, detail="Slots 7-10 are reserved for mixers")
+    # validate ingredient type
+    if payload.ingredient_type not in ("alcohol", "mixer"):
+        raise HTTPException(status_code=400, detail="Invalid ingredient type")
 
-    slot.ingredient_type = slot_in.ingredient_type
-    slot.ingredient_id = slot_in.ingredient_id
-    slot.volume_ml = slot_in.volume_ml
-    slot.active = slot_in.active
+    # validate ingredient exists
+    if payload.ingredient_type == "alcohol":
+        exists = db.query(models.Alcohol).filter(models.Alcohol.id == payload.ingredient_id).first()
+        if not exists:
+            raise HTTPException(status_code=400, detail="Alcohol not found")
+
+    if payload.ingredient_type == "mixer":
+        exists = db.query(models.Mixer).filter(models.Mixer.id == payload.ingredient_id).first()
+        if not exists:
+            raise HTTPException(status_code=400, detail="Mixer not found")
+
+    slot.ingredient_type = payload.ingredient_type
+    slot.ingredient_id = payload.ingredient_id
+    slot.volume_ml = payload.volume_ml
+    slot.active = payload.active
 
     db.commit()
     db.refresh(slot)
     return slot
+
+# ---------------------------------------------------------
+#  MACHINE FILLERS 7–10 (MIXERS ONLY)
+# ---------------------------------------------------------
+
+@router.get("/machine_fillers", response_model=List[schemas.MachineFillerOut])
+def list_fillers(db: Session = Depends(get_db)):
+    return db.query(models.MachineFiller).order_by(models.MachineFiller.slot_number).all()
+
+
+@router.put("/machine_fillers/{slot_number}", response_model=schemas.MachineFillerOut)
+def update_filler(
+    slot_number: int,
+    payload: schemas.MachineFillerUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role != models.RoleEnum.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    if not (7 <= slot_number <= 10):
+        raise HTTPException(status_code=400, detail="Slots 7–10 only")
+
+    filler = db.query(models.MachineFiller).filter_by(slot_number=slot_number).first()
+    if not filler:
+        raise HTTPException(status_code=404, detail="Filler slot not found")
+
+    mixer = db.query(models.Mixer).filter(models.Mixer.id == payload.mixer_id).first()
+    if not mixer:
+        raise HTTPException(status_code=400, detail="Mixer not found")
+
+    filler.mixer_id = payload.mixer_id
+    filler.volume_ml = payload.volume_ml
+    filler.active = payload.active
+
+    db.commit()
+    db.refresh(filler)
+    return filler

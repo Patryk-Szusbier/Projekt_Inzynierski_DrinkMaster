@@ -8,41 +8,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Ingredient } from "@/interface/IDrink";
-import type { Slot } from "@/interface/ISlot";
+import type { Ingredient } from "@/interface/IIngredientl";
+import type { MachineSlot, MachineFiller } from "@/interface/ISlot";
 
 const MachineSlots: React.FC = () => {
   const [alcohols, setAlcohols] = useState<Ingredient[]>([]);
   const [mixers, setMixers] = useState<Ingredient[]>([]);
-  const [slots, setSlots] = useState<Slot[]>([]);
+  const [slots, setSlots] = useState<MachineSlot[]>([]); // sloty 1–6
+  const [fillers, setFillers] = useState<MachineFiller[]>([]); // sloty 7–10
+
   const formatTypeForBackend = (type: "ALCOHOL" | "MIXER") =>
     type.toLowerCase();
+
   useEffect(() => {
     const fetchData = async () => {
-      const [alc, mix, machineSlots] = await Promise.all([
+      const [alc, mix, machineSlots, machineFillers] = await Promise.all([
         api.get<Ingredient[]>("/ingredients/alcohols"),
         api.get<Ingredient[]>("/ingredients/mixers"),
-        api.get<Slot[]>("/ingredients/machine_slots"),
+        api.get<MachineSlot[]>("/ingredients/machine_slots"),
+        api.get<MachineFiller[]>("/ingredients/machine_fillers"),
       ]);
-
-      const sortedSlots = [...machineSlots].sort(
-        (a, b) => a.slot_number - b.slot_number
-      );
 
       setAlcohols(alc);
       setMixers(mix);
-      setSlots(sortedSlots);
+      setSlots(machineSlots.sort((a, b) => a.slot_number - b.slot_number));
+      setFillers(machineFillers.sort((a, b) => a.slot_number - b.slot_number));
     };
 
     fetchData();
   }, []);
 
+  // ---- SLOTY 1–6 ----
   const handleTypeChange = (slotIndex: number, type: "alcohol" | "mixer") => {
     const updatedSlots = [...slots];
     updatedSlots[slotIndex] = {
       ...updatedSlots[slotIndex],
       ingredient_type: type,
-      ingredient_id: null,
+      ingredient_id: 0,
     };
     setSlots(updatedSlots);
   };
@@ -56,7 +58,7 @@ const MachineSlots: React.FC = () => {
     setSlots(updatedSlots);
   };
 
-  const handleSaveSlot = async (slot: Slot) => {
+  const handleSaveSlot = async (slot: MachineSlot) => {
     if (!slot.ingredient_type || !slot.ingredient_id) {
       alert("Wybierz typ i składnik przed zapisaniem!");
       return;
@@ -65,13 +67,13 @@ const MachineSlots: React.FC = () => {
     try {
       const payload = {
         ingredient_type: formatTypeForBackend(
-          slot.ingredient_type as "ALCOHOL" | "MIXER"
+          slot.ingredient_type.toUpperCase() as "ALCOHOL" | "MIXER"
         ),
         ingredient_id: slot.ingredient_id,
         volume_ml: slot.volume_ml ?? 0,
-        active: slot.active ?? true,
+        active: true,
       };
-      console.log(payload);
+
       await api.put(`/ingredients/machine_slots/${slot.slot_number}`, payload);
       alert(`Slot ${slot.slot_number} zapisany!`);
     } catch (err) {
@@ -80,15 +82,50 @@ const MachineSlots: React.FC = () => {
     }
   };
 
+  // ---- FILLERY 7–10 ----
+  const handleFillerChange = (index: number, ingredientId: number) => {
+    const updated = [...fillers];
+    updated[index] = {
+      ...updated[index],
+      mixer_id: ingredientId,
+    };
+    setFillers(updated);
+  };
+
+  const handleSaveFiller = async (filler: MachineFiller) => {
+    if (!filler.mixer_id) {
+      alert("Wybierz mixer przed zapisaniem!");
+      return;
+    }
+
+    try {
+      const payload = {
+        mixer_id: filler.mixer_id,
+        volume_ml: filler.volume_ml ?? 0,
+        active: true,
+      };
+
+      await api.put(
+        `/ingredients/machine_fillers/${filler.slot_number}`,
+        payload
+      );
+      alert(`Slot ${filler.slot_number} zapisany!`);
+    } catch (err) {
+      console.error(err);
+      alert(`Błąd przy zapisie slotu ${filler.slot_number}`);
+    }
+  };
+
   return (
     <div className="p-6 max-h-[80vh] overflow-y-auto space-y-6">
       {/* Sloty 1-6 */}
       <div>
         <h2 className="font-bold mb-4 text-contrast text-xl">
-          Sloty 1-6 (Alkohol lub Mixer)
+          Sloty 1-6 (Dozowniki)
         </h2>
+
         <div className="space-y-4">
-          {slots.slice(0, 6).map((slot, i) => {
+          {slots.map((slot, i) => {
             const currentType = slot.ingredient_type?.toUpperCase() as
               | "ALCOHOL"
               | "MIXER"
@@ -96,9 +133,25 @@ const MachineSlots: React.FC = () => {
 
             const ingredients =
               currentType === "ALCOHOL"
-                ? alcohols
+                ? alcohols.filter(
+                    (a) =>
+                      !slots.some(
+                        (s, idx) =>
+                          idx !== i &&
+                          s.ingredient_type === "alcohol" &&
+                          s.ingredient_id === a.id
+                      )
+                  )
                 : currentType === "MIXER"
-                ? mixers
+                ? mixers.filter(
+                    (m) =>
+                      !slots.some(
+                        (s, idx) =>
+                          idx !== i &&
+                          s.ingredient_type === "mixer" &&
+                          s.ingredient_id === m.id
+                      ) && !fillers.some((f) => f.mixer_id === m.id)
+                  )
                 : [];
 
             return (
@@ -108,7 +161,6 @@ const MachineSlots: React.FC = () => {
               >
                 <span className="w-20 font-semibold">{slot.slot_number}</span>
 
-                {/* Select typu */}
                 <Select
                   value={currentType || ""}
                   onValueChange={(val) =>
@@ -124,7 +176,6 @@ const MachineSlots: React.FC = () => {
                   </SelectContent>
                 </Select>
 
-                {/* Select składnika */}
                 <Select
                   value={slot.ingredient_id?.toString() || ""}
                   onValueChange={(val) =>
@@ -136,22 +187,11 @@ const MachineSlots: React.FC = () => {
                     <SelectValue placeholder="-- Składnik --" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ingredients
-                      .filter(
-                        (ing) =>
-                          ing.name === "Brak" ||
-                          !slots.some(
-                            (s, idx) =>
-                              idx !== i &&
-                              s.ingredient_id === ing.id &&
-                              s.ingredient_type?.toUpperCase() === currentType
-                          )
-                      )
-                      .map((ing) => (
-                        <SelectItem key={ing.id} value={ing.id.toString()}>
-                          {ing.name}
-                        </SelectItem>
-                      ))}
+                    {ingredients.map((ing) => (
+                      <SelectItem key={ing.id} value={ing.id.toString()}>
+                        {ing.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -167,56 +207,53 @@ const MachineSlots: React.FC = () => {
         </div>
       </div>
 
-      {/* Sloty 7-10 (tylko Mixery) */}
+      {/* Sloty 7-10 */}
       <div>
-        <h2 className="font-bold mb-4 text-contrast text-xl">
-          Sloty 7-10 (Tylko Mixery)
-        </h2>
-        <div className="space-y-4">
-          {slots.slice(6, 10).map((slot, i) => (
-            <div
-              key={slot.slot_number}
-              className="flex items-center p-4 bg-back rounded-xl shadow-md space-x-4"
-            >
-              <span className="w-20 font-semibold">{slot.slot_number}</span>
+        <h2 className="font-bold mb-4 text-contrast text-xl">Sloty 7-10</h2>
 
-              <Select
-                value={slot.ingredient_id?.toString() || ""}
-                onValueChange={(val) =>
-                  handleIngredientChange(i + 6, Number(val))
-                }
+        <div className="space-y-4">
+          {fillers.map((filler, i) => {
+            const availableMixers = mixers.filter(
+              (m) =>
+                !fillers.some((f, idx) => idx !== i && f.mixer_id === m.id) &&
+                !slots.some(
+                  (s) =>
+                    s.ingredient_type === "mixer" && s.ingredient_id === m.id
+                )
+            );
+
+            return (
+              <div
+                key={filler.slot_number}
+                className="flex items-center p-4 bg-back rounded-xl shadow-md space-x-4"
               >
-                <SelectTrigger className="w-48 bg-white text-contrast">
-                  <SelectValue placeholder="-- Składnik --" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mixers
-                    .filter(
-                      (m) =>
-                        m.name === "Brak" ||
-                        !slots.some(
-                          (s, idx) =>
-                            idx !== i + 6 &&
-                            s.ingredient_id === m.id &&
-                            s.ingredient_type?.toUpperCase() === "MIXER"
-                        )
-                    )
-                    .map((m) => (
+                <span className="w-20 font-semibold">{filler.slot_number}</span>
+
+                <Select
+                  value={filler.mixer_id?.toString() || ""}
+                  onValueChange={(val) => handleFillerChange(i, Number(val))}
+                >
+                  <SelectTrigger className="w-48 bg-white text-contrast">
+                    <SelectValue placeholder="-- Składnik --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableMixers.map((m) => (
                       <SelectItem key={m.id} value={m.id.toString()}>
                         {m.name}
                       </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
 
-              <Button
-                onClick={() => handleSaveSlot(slot)}
-                disabled={!slot.ingredient_id}
-              >
-                Zapisz
-              </Button>
-            </div>
-          ))}
+                <Button
+                  onClick={() => handleSaveFiller(filler)}
+                  disabled={!filler.mixer_id}
+                >
+                  Zapisz
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

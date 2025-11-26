@@ -1,6 +1,6 @@
 export type TypeMixer = "soda" | "juice" | "syrup" | "other";
 
-export interface Ingredient {
+export type Ingredient {
   id: number;
   name: string;
 }

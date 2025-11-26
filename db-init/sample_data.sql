@@ -60,11 +60,7 @@ VALUES
   (3, 'mixer', 3, 1000, true, 'Syrop malinowy slot'),
   (4, 'mixer', 0, 0, false, 'Empty slot'),
   (5, 'mixer', 0, 0, false, 'Empty slot'),
-  (6, 'mixer', 0, 0, false, 'Empty slot'),
-  (7, 'mixer', 0, 0, false, 'Mixer slot 7'),
-  (8, 'mixer', 0, 0, false, 'Mixer slot 8'),
-  (9, 'mixer', 0, 0, false, 'Mixer slot 9'),
-  (10,'mixer', 0, 0, false, 'Mixer slot 10')
+  (6, 'mixer', 0, 0, false, 'Empty slot')
 ON CONFLICT (slot_number) DO NOTHING;
 
 
@@ -73,5 +69,9 @@ ON CONFLICT (slot_number) DO NOTHING;
 -- -------------------------------
 INSERT INTO machine_fillers (slot_number, mixer_id, volume_ml, active, note)
 VALUES
-(1, 1, 2000, true, 'Cola slot'),
-(2, 2, 1500, true, 'Sok jabłkowy slot');
+(7, 1, 2000, true, 'Cola slot'),
+(8, 2, 1500, true, 'Sok jabłkowy slot'),
+(9, 3, 1000, true, 'Syrop malinowy slot'),
+(10, 4, 3000, true, 'Woda gazowana slot')
+ON CONFLICT (slot_number) DO NOTHING;
+

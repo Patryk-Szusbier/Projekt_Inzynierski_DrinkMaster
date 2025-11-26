@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import Photos from "../assets/margarita.jpg";
 import type { Drink } from "@/interface/IDrink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -74,11 +73,13 @@ const DrinkDetails: React.FC = () => {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${drink.image_url || Photos})`,
+            backgroundImage: `url(${import.meta.env.VITE_API_URL}/drinkPhotos/${
+              drink.image_url
+            })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            clipPath: "polygon(0 0, 99% 0, 43% 100%, 0% 100%)",
-            transform: "translateX(-25%) translateY(-10%)",
+            clipPath: "polygon(0% 7%, 93% 7%, 40% 100%, 0% 100%)",
+            transform: "translateX(-28%) translateY(-5%)",
             zIndex: 10,
           }}
         />
