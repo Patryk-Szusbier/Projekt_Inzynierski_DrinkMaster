@@ -77,15 +77,14 @@ const DrinkMenu: React.FC = () => {
       </div>
 
       {/* Lista drinków */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
         {filteredDrinks.map((drink) => (
           <div
             key={drink.id}
             onClick={() =>
               navigate(`/main/drinks/${drink.id}`, { state: { drink } })
             }
-            className="relative h-[300px] rounded-3xl overflow-hidden shadow-lg 
-            cursor-pointer transition-transform duration-300 hover:scale-[1.05] hover:shadow-2xl"
+            className="relative h-[300px] border-2 border-acent rounded-3xl overflow-hidden shadow-lg"
           >
             {/* Zdjęcie */}
             <img
@@ -96,12 +95,12 @@ const DrinkMenu: React.FC = () => {
               className="w-full h-full object-cover"
             />
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/25 bg-opacity-25 hover:bg-opacity-35 transition-all duration-300" />
+            <div className="absolute inset-0 bg-black/25" />
             {}
             {/* Nazwa */}
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-center z-20">
               <span
-                className="text-contrast text-xl font-semibold bg-white/80 px-2 py-2 
+                className="text-contrast text-xl font-semibold bg-white/65 px-2 py-2 
                 rounded-full shadow-md backdrop-blur-sm"
               >
                 {drink.name}

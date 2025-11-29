@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import type { Ingredient } from "@/interface/IIngredientl";
 import type { MachineSlot, MachineFiller } from "@/interface/ISlot";
+import { toast } from "sonner";
 
 const MachineSlots: React.FC = () => {
   const [alcohols, setAlcohols] = useState<Ingredient[]>([]);
@@ -60,7 +61,7 @@ const MachineSlots: React.FC = () => {
 
   const handleSaveSlot = async (slot: MachineSlot) => {
     if (!slot.ingredient_type || !slot.ingredient_id) {
-      alert("Wybierz typ i składnik przed zapisaniem!");
+      toast.error("Wybierz typ i składnik przed zapisaniem!");
       return;
     }
 
@@ -75,10 +76,10 @@ const MachineSlots: React.FC = () => {
       };
 
       await api.put(`/ingredients/machine_slots/${slot.slot_number}`, payload);
-      alert(`Slot ${slot.slot_number} zapisany!`);
+      toast.success(`Slot ${slot.slot_number} zapisany!`);
     } catch (err) {
       console.error(err);
-      alert(`Błąd przy zapisie slotu ${slot.slot_number}`);
+      toast.error(`Błąd przy zapisie slotu ${slot.slot_number}`);
     }
   };
 
@@ -94,7 +95,7 @@ const MachineSlots: React.FC = () => {
 
   const handleSaveFiller = async (filler: MachineFiller) => {
     if (!filler.mixer_id) {
-      alert("Wybierz mixer przed zapisaniem!");
+      toast.error("Wybierz mixer przed zapisaniem!");
       return;
     }
 
@@ -109,10 +110,10 @@ const MachineSlots: React.FC = () => {
         `/ingredients/machine_fillers/${filler.slot_number}`,
         payload
       );
-      alert(`Slot ${filler.slot_number} zapisany!`);
+      toast.success(`Slot ${filler.slot_number} zapisany!`);
     } catch (err) {
       console.error(err);
-      alert(`Błąd przy zapisie slotu ${filler.slot_number}`);
+      toast.error(`Błąd przy zapisie slotu ${filler.slot_number}`);
     }
   };
 
@@ -157,7 +158,7 @@ const MachineSlots: React.FC = () => {
             return (
               <div
                 key={slot.slot_number}
-                className="flex items-center p-4 bg-back rounded-xl shadow-md space-x-4"
+                className="flex items-center p-4 bg-back border-r-3 border-r-acent border-b-4 border-b-acent rounded-xl shadow-md space-x-4"
               >
                 <span className="w-20 font-semibold">{slot.slot_number}</span>
 
@@ -167,7 +168,7 @@ const MachineSlots: React.FC = () => {
                     handleTypeChange(i, val as "alcohol" | "mixer")
                   }
                 >
-                  <SelectTrigger className="w-32 bg-white text-contrast">
+                  <SelectTrigger className="w-32 bg-white border-acent text-contrast">
                     <SelectValue placeholder="-- Typ --" />
                   </SelectTrigger>
                   <SelectContent>
@@ -183,7 +184,7 @@ const MachineSlots: React.FC = () => {
                   }
                   disabled={!currentType}
                 >
-                  <SelectTrigger className="w-48 bg-white text-contrast">
+                  <SelectTrigger className="w-48 bg-white border-acent text-contrast">
                     <SelectValue placeholder="-- Składnik --" />
                   </SelectTrigger>
                   <SelectContent>
@@ -198,6 +199,7 @@ const MachineSlots: React.FC = () => {
                 <Button
                   onClick={() => handleSaveSlot(slot)}
                   disabled={!slot.ingredient_type || !slot.ingredient_id}
+                  className="bg-contrast "
                 >
                   Zapisz
                 </Button>
@@ -211,7 +213,7 @@ const MachineSlots: React.FC = () => {
       <div>
         <h2 className="font-bold mb-4 text-contrast text-xl">Sloty 7-10</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           {fillers.map((filler, i) => {
             const availableMixers = mixers.filter(
               (m) =>
@@ -225,7 +227,7 @@ const MachineSlots: React.FC = () => {
             return (
               <div
                 key={filler.slot_number}
-                className="flex items-center p-4 bg-back rounded-xl shadow-md space-x-4"
+                className="flex items-center p-4 bg-back border-r-3 border-r-acent border-b-4 border-b-acent rounded-xl shadow-md space-x-4"
               >
                 <span className="w-20 font-semibold">{filler.slot_number}</span>
 
@@ -233,7 +235,7 @@ const MachineSlots: React.FC = () => {
                   value={filler.mixer_id?.toString() || ""}
                   onValueChange={(val) => handleFillerChange(i, Number(val))}
                 >
-                  <SelectTrigger className="w-48 bg-white text-contrast">
+                  <SelectTrigger className="w-48 bg-white border-acent text-contrast">
                     <SelectValue placeholder="-- Składnik --" />
                   </SelectTrigger>
                   <SelectContent>
@@ -248,6 +250,7 @@ const MachineSlots: React.FC = () => {
                 <Button
                   onClick={() => handleSaveFiller(filler)}
                   disabled={!filler.mixer_id}
+                  className="bg-contrast"
                 >
                   Zapisz
                 </Button>

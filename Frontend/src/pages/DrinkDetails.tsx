@@ -80,7 +80,7 @@ const DrinkDetails: React.FC = () => {
             backgroundPosition: "center",
             clipPath: "polygon(0% 7%, 93% 7%, 40% 100%, 0% 100%)",
             transform: "translateX(-28%) translateY(-5%)",
-            zIndex: 10,
+            zIndex: 30,
           }}
         />
       </div>
@@ -89,19 +89,19 @@ const DrinkDetails: React.FC = () => {
       <div className="absolute left-40 bottom-0 w-screen h-[5px] bg-main rotate-315 origin-bottom-left z-20" />
 
       {/* Prawa strona */}
-      <div className="absolute right-12 top-32 flex flex-col space-y-5 w-[400px] z-30">
+      <div className="absolute right-12 top-32 flex flex-col space-y-5 w-[480px] z-10">
         {/* Nazwa */}
         <div className="flex items-center justify-center w-full">
           <div className="grow h-1 bg-main mr-4" />
-          <span className="text-2xl font-semibold whitespace-nowrap text-center">
+          <span className="text-4xl font-semibold whitespace-nowrap text-center">
             {drink.name}
           </span>
           <div className="grow h-1 bg-main ml-4" />
         </div>
-        <span className="italic mt-2">{drink.description}</span>
+        <span className="italic text-lg mt-2">{drink.description}</span>
         {/* Skład */}
-        <div className="text-xl font-medium">Skład:</div>
-        <ul className="list-none space-y-2 text-left text-lg">
+        <div className="text-2xl font-medium">Skład:</div>
+        <ul className="list-none space-y-2 text-left text-xl">
           {drink.ingredients.map((item, i) => {
             const name =
               item.ingredient_type === "alcohol"

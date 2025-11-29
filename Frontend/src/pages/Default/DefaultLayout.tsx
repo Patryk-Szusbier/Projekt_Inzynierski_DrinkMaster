@@ -1,6 +1,7 @@
 import BackButton from "@/components/BackButton/BackButton";
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { Toaster } from "sonner";
 
 const DefaultLayout: React.FC = () => {
   const location = useLocation();
@@ -8,6 +9,7 @@ const DefaultLayout: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen text-contrast bg-linear-to-br from-back to-main">
+      <Toaster position="bottom-right" richColors />
       {!isMainRoute && (
         <div className="fixed top-0 left-0 w-full h-20 bg-contrast/10 backdrop-blur-lg z-20 flex items-center px-4">
           <BackButton />
