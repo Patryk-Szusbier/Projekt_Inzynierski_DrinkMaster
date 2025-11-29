@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routers import users, drinks, ingredients, favorite_drinks
+from .routers import users, drinks, ingredients, favorite_drinks, drink_frame
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="DrinkMachine API")
@@ -30,6 +30,7 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(drinks.router, prefix="/drinks", tags=["drinks"])
 app.include_router(ingredients.router, prefix="/ingredients", tags=["ingredients"])
 app.include_router(favorite_drinks.router, prefix="/favorite_drinks", tags=["favorite_drinks"])
+app.include_router(drink_frame.router, prefix="/frame", tags=["UART"])
 
 @app.get("/")
 def read_root():
