@@ -1,12 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { apiLogin, apiMe } from "../../hooks/api";
-import { getToken, saveToken, clearToken } from "../../hooks/authStorage";
+import { apiLogin, apiMe } from "../../lib/api";
+import { getToken, saveToken, clearToken } from "../../lib/authStorage";
 import { useRouter } from "expo-router";
-type User = {
-  id: number;
-  username: string;
-  email: string;
-};
+import type { User } from "@/interface/IUser";
 
 type AuthContextType = {
   user: User | null;

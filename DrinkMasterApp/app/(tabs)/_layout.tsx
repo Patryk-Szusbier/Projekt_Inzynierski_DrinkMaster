@@ -10,7 +10,7 @@ export default function TabLayout() {
   if (loading) return null;
 
   if (!user) {
-    return <Redirect href="./login" />;
+    return <Redirect href="/(auth)/login" />;
   }
 
   return (

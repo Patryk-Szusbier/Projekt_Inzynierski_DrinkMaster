@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,49 +7,67 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { useAuth } from "../components/Auth/AuthContext";
 import { useRouter } from "expo-router";
 
-export default function Login() {
-  const { login, user } = useAuth();
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+export default function Register() {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      setError("Hasła nie są takie same");
+      return;
+    }
+
     setLoading(true);
     setError("");
+
     try {
-      await login(username, password);
-      // redirect po zalogowaniu
-      router.replace("/(tabs)");
+      const res = await fetch(`${API_URL}/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.detail || "Błąd rejestracji");
+      }
+
+      // po rejestracji → login
+      router.replace("/login");
     } catch (e: any) {
       console.error(e);
-      setError("Nieprawidłowy login lub hasło");
+      setError(e.message || "Wystąpił błąd");
     } finally {
       setLoading(false);
     }
   };
 
-  // jeśli użytkownik już zalogowany, od razu przekieruj
-  useEffect(() => {
-    if (user) {
-      router.replace("/(tabs)");
-    }
-  });
-
   return (
     <View style={styles.container}>
       <View style={styles.card}>
+        {/* HEADER */}
         <View style={styles.header}>
           <View style={styles.line} />
-          <Text style={styles.title}>Logowanie</Text>
+          <Text style={styles.title}>Rejestracja</Text>
           <View style={styles.line} />
         </View>
 
+        {/* CONTENT */}
         <View style={styles.content}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Username</Text>
@@ -63,37 +81,61 @@ export default function Login() {
           </View>
 
           <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="example@mail.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
             <Text style={styles.label}>Hasło</Text>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
+              secureTextEntry
               value={password}
               onChangeText={setPassword}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Powtórz hasło</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
               secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
             />
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
 
+        {/* FOOTER */}
         <View style={styles.footer}>
           <TouchableOpacity
             style={[styles.button, styles.buttonPrimary]}
-            onPress={handleLogin}
+            onPress={handleRegister}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Zaloguj się</Text>
+              <Text style={styles.buttonText}>Zarejestruj się</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.buttonOutline]}
-            onPress={() => router.push("/login")}
+            onPress={() => router.replace("/login")}
           >
-            <Text style={styles.buttonOutlineText}>Utwórz konto</Text>
+            <Text style={styles.buttonOutlineText}>Mam już konto</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -163,7 +205,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
-    flexDirection: "column",
     gap: 8,
   },
   button: {

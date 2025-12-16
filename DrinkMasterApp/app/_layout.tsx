@@ -19,8 +19,8 @@ export default function RootLayout() {
       <ThemeProvider
         value={colorScheme === "dark" ? DarkThemeCustom : LightTheme}
       >
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
         </Stack>
 
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
