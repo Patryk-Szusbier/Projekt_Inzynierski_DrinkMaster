@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Drink } from "@/interface/iDrink";
+import type { Drink, DrinkIngredient } from "@/interface/iDrink";
 import { User } from "@/interface/IUser";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -119,6 +119,63 @@ export async function apiFetchIngredients(
     alcohols: Object.fromEntries(alcohols.map((a) => [a.id, a.name])),
     mixers: Object.fromEntries(mixers.map((m) => [m.id, m.name])),
   };
+}
+export async function apiGetMyDrinks(token: string) {
+  const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/drinks/my`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Nie udało się pobrać moich drinków");
+  }
+
+  return res.json();
+}
+/* ================= DRINKS ================= */
+
+export async function apiGetDrinkById(drinkId: number, token: string) {
+  const { data } = await api.get(`/drinks/${drinkId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return data; // typ Drink
+}
+
+export async function apiUpdateDrink(
+  drinkId: number,
+  token: string,
+  data: {
+    name: string;
+    description?: string;
+    ingredients: DrinkIngredient[];
+    image?: any; // opcjonalnie plik do uploadu
+    is_public?: boolean; // dodane
+  }
+) {
+  const formData = new FormData();
+  formData.append("name", data.name);
+  if (data.description) formData.append("description", data.description);
+  formData.append("ingredients", JSON.stringify(data.ingredients));
+  if (data.is_public !== undefined) {
+    formData.append("is_public", data.is_public ? "true" : "false");
+  }
+  if (data.image) {
+    formData.append("image", {
+      uri: data.image.uri,
+      type: data.image.type || "image/jpeg",
+      name: data.image.name || "photo.jpg",
+    } as any);
+  }
+
+  const { data: updated } = await api.put(`/drinks/${drinkId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return updated; // typ Drink
 }
 
 export default api;

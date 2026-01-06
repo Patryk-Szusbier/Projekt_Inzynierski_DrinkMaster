@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
-import { useAuth } from "../../components/Auth/AuthContext"; // upewnij się, że ścieżka jest poprawna
+import { useAuth } from "../../components/Auth/AuthContext";
+import MyDrinksMenu from "@/components/mydrinks";
 
 export default function ProfilePage() {
   const { logout } = useAuth();
@@ -16,6 +17,7 @@ export default function ProfilePage() {
       <TouchableOpacity style={style.button} onPress={handleLogout}>
         <Text style={style.buttonText}>Wyloguj</Text>
       </TouchableOpacity>
+      <MyDrinksMenu />
     </View>
   );
 }
@@ -23,8 +25,6 @@ export default function ProfilePage() {
 const style = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 16,
     backgroundColor: "#EDF1D6",
   },
@@ -38,6 +38,8 @@ const style = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 10,
+    alignSelf: "flex-start",
+    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",

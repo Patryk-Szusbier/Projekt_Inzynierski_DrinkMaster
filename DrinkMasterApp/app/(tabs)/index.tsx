@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useFocusEffect } from "@react-navigation/native";
 import type { Drink } from "@/interface/iDrink";
 import {
   apiGetAvailableDrinks,
@@ -28,9 +28,11 @@ export default function DrinkMenu() {
   const [loading, setLoading] = useState(true);
   const [showFavorites, setShowFavorites] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   async function loadData() {
     try {
