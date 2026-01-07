@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import type { Drink } from "@/interface/iDrink";
 import {
@@ -22,6 +23,7 @@ import { getToken } from "@/lib/authStorage";
 
 export default function DrinkMenu() {
   const router = useRouter();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
@@ -104,7 +106,7 @@ export default function DrinkMenu() {
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: tabBarHeight + 80 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
@@ -147,6 +149,14 @@ export default function DrinkMenu() {
           </Text>
         }
       />
+
+      <TouchableOpacity
+        style={[styles.fab, { bottom: tabBarHeight + 16 }]}
+        onPress={() => router.push("/drinks/create")}
+        accessibilityLabel="Dodaj nowa recepture"
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -225,5 +235,21 @@ const styles = StyleSheet.create({
     marginTop: 40,
     color: "#40513B",
     fontSize: 16,
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: MAIN_COLOR,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });

@@ -11,9 +11,6 @@ if (!API_URL) {
 // Tworzymy instancję axios z baseURL
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 /* ================= AUTH ================= */
@@ -171,11 +168,57 @@ export async function apiUpdateDrink(
   const { data: updated } = await api.put(`/drinks/${drinkId}`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
     },
   });
 
   return updated; // typ Drink
+}
+
+export async function apiCreateDrink(
+  token: string,
+  data: {
+    name: string;
+    description?: string;
+    ingredients: DrinkIngredient[];
+    image?: any;
+    is_public?: boolean;
+  }
+) {
+  const formData = new FormData();
+  formData.append("name", data.name);
+  if (data.description) formData.append("description", data.description);
+  formData.append("ingredients", JSON.stringify(data.ingredients));
+  if (data.is_public !== undefined) {
+    formData.append("is_public", data.is_public ? "true" : "false");
+  }
+  if (data.image) {
+    formData.append("image", {
+      uri: data.image.uri,
+      type: data.image.type || "image/jpeg",
+      name: data.image.name || "photo.jpg",
+    } as any);
+  }
+
+  const res = await fetch(`${API_URL}/drinks/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Create drink failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function apiDeleteDrink(token: string, drinkId: number) {
+  await api.delete(`/drinks/${drinkId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export default api;

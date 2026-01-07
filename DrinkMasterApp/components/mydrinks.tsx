@@ -8,12 +8,13 @@ import {
   Image,
   ActivityIndicator,
   Dimensions,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import type { Drink } from "@/interface/iDrink";
-import { apiGetMyDrinks } from "@/lib/api";
+import { apiDeleteDrink, apiGetMyDrinks } from "@/lib/api";
 import { getToken } from "@/lib/authStorage";
 
 export default function MyDrinksMenu() {
@@ -37,6 +38,33 @@ export default function MyDrinksMenu() {
       console.error("Błąd pobierania moich drinków:", e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  const confirmDelete = (drinkId: number) => {
+    Alert.alert(
+      "Usunac recepture?",
+      "Ta akcja jest nieodwracalna.",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Usun",
+          style: "destructive",
+          onPress: () => handleDelete(drinkId),
+        },
+      ]
+    );
+  };
+
+  async function handleDelete(drinkId: number) {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      await apiDeleteDrink(token, drinkId);
+      setDrinks((prev) => prev.filter((d) => d.id !== drinkId));
+    } catch (e) {
+      console.error("Blad usuwania receptury:", e);
     }
   }
 
@@ -69,7 +97,7 @@ export default function MyDrinksMenu() {
             activeOpacity={0.85}
             onPress={() =>
               router.push({
-                pathname: "/drinks/[id]",
+                pathname: "/drinks/edit/[id]",
                 params: { id: item.id.toString() },
               })
             }
@@ -87,15 +115,10 @@ export default function MyDrinksMenu() {
 
             {/* Przycisk edycji */}
             <TouchableOpacity
-              style={styles.editButton}
-              onPress={() =>
-                router.push({
-                  pathname: "/drinks/edit/[id]",
-                  params: { id: item.id.toString() },
-                })
-              }
+              style={styles.deleteButton}
+              onPress={() => confirmDelete(item.id)}
             >
-              <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+              <Ionicons name="close" size={22} color="#fff" />
             </TouchableOpacity>
           </TouchableOpacity>
         )}
@@ -161,7 +184,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#40513B",
   },
-  editButton: {
+  deleteButton: {
     position: "absolute",
     top: 8,
     right: 8,
