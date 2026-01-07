@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 import enum
+from datetime import datetime
 
 # --- Enums ---
 class RoleEnum(str, enum.Enum):
@@ -27,11 +28,22 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = None
 
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = Field(None, min_length=3)
+    email: Optional[EmailStr] = None
+
+
+class UserPasswordChange(BaseModel):
+    current_password: str = Field(..., min_length=6)
+    new_password: str = Field(..., min_length=6)
+
+
 class UserOut(BaseModel):
     id: int
     username: str
     email: Optional[EmailStr]
     role: RoleEnum
+    created_at: datetime
 
     class Config:
         from_attributes = True

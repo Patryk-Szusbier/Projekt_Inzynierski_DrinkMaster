@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -18,6 +19,8 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -73,7 +76,7 @@ export default function Register() {
             <Text style={styles.label}>Username</Text>
             <TextInput
               style={styles.input}
-              placeholder="Twój login"
+              placeholder="Twoj login"
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
@@ -93,30 +96,61 @@ export default function Register() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Hasło</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
+            <Text style={styles.label}>Haslo</Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="********"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setShowPassword((v) => !v)}
+                accessibilityLabel={
+                  showPassword ? "Ukryj haslo" : "Pokaz haslo"
+                }
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#40513B"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Powtórz hasło</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
+            <Text style={styles.label}>Powtorz haslo</Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="********"
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setShowConfirmPassword((v) => !v)}
+                accessibilityLabel={
+                  showConfirmPassword ? "Ukryj haslo" : "Pokaz haslo"
+                }
+              >
+                <Ionicons
+                  name={
+                    showConfirmPassword ? "eye-off-outline" : "eye-outline"
+                  }
+                  size={20}
+                  color="#40513B"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
-
         {/* FOOTER */}
         <View style={styles.footer}>
           <TouchableOpacity
@@ -199,6 +233,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  inputFlex: {
+    flex: 1,
+  },
+  toggleButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#9DC08B",
+    backgroundColor: "#fff",
   },
   error: {
     color: "red",

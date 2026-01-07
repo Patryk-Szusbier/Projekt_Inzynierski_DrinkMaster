@@ -118,6 +118,9 @@ export default function CreateDrink() {
     });
   };
 
+  const clearImage = () => {
+    setImage(null);
+  };
   const saveDrink = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
@@ -174,11 +177,18 @@ export default function CreateDrink() {
       {image ? (
         <Image source={{ uri: image.uri }} style={styles.preview} />
       ) : null}
-      <TouchableOpacity style={styles.photoBtn} onPress={pickImage}>
-        <Text style={{ color: "#fff" }}>
-          {image ? "Zmien zdjecie" : "Dodaj zdjecie"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.photoRow}>
+        <TouchableOpacity style={styles.photoBtn} onPress={pickImage}>
+          <Text style={{ color: "#fff" }}>
+            {image ? "Zmien zdjecie" : "Dodaj zdjecie"}
+          </Text>
+        </TouchableOpacity>
+        {image ? (
+          <TouchableOpacity style={styles.photoBtnGhost} onPress={clearImage}>
+            <Text style={styles.photoGhostText}>Usun</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
       <Text style={styles.label}>Skladniki:</Text>
       {ingredients.map((ing, index) => (
@@ -306,6 +316,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 16,
     alignItems: "center",
+  },
+  photoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  photoBtnGhost: {
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#9DC08B",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  photoGhostText: {
+    color: "#40513B",
+    fontWeight: "600",
   },
   photoBtn: {
     backgroundColor: "#9DC08B",

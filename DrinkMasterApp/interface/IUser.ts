@@ -5,4 +5,5 @@ export interface User {
   username: string;
   email?: string;
   role: RoleEnum;
+  created_at: string;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Image,
+  Switch,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { Switch } from "react-native";
+import type { MediaType } from "expo-image-picker";
 import type {
   Drink,
   DrinkIngredient,
@@ -19,7 +21,7 @@ import type {
 } from "@/interface/iDrink";
 import type { Alcohol, Mixers } from "@/interface/IIngredientl";
 import { getToken } from "@/lib/authStorage";
-import api, { apiGetDrinkById, apiUpdateDrink } from "@/lib/api";
+import { apiGetDrinkById, apiUpdateDrink } from "@/lib/api";
 
 export default function EditDrink() {
   const router = useRouter();
@@ -38,11 +40,7 @@ export default function EditDrink() {
     type: string;
   } | null>(null);
   const [isPublic, setIsPublic] = useState(true);
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const token = await getToken();
       if (!token) return;
@@ -72,7 +70,11 @@ export default function EditDrink() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const addIngredient = () => {
     setIngredients((prev) => [
@@ -101,6 +103,34 @@ export default function EditDrink() {
 
   const removeIngredient = (index: number) => {
     setIngredients((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const mediaTypes: MediaType[] = ["images"];
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const name = asset.fileName || "photo.jpg";
+    const type = asset.mimeType || "image/jpeg";
+
+    setImage({
+      uri: asset.uri,
+      name,
+      type,
+    });
+  };
+
+  const clearImage = () => {
+    setImage(null);
   };
 
   const saveDrink = async () => {
@@ -142,6 +172,30 @@ export default function EditDrink() {
         onChangeText={setDescription}
         multiline
       />
+      <Text style={styles.label}>Zdjecie:</Text>
+      {image ? (
+        <Image source={{ uri: image.uri }} style={styles.preview} />
+      ) : drink?.image_url ? (
+        <Image
+          source={{
+            uri: `${process.env.EXPO_PUBLIC_API_URL}/drinkPhotos/${drink.image_url}`,
+          }}
+          style={styles.preview}
+        />
+      ) : null}
+      <View style={styles.photoRow}>
+        <TouchableOpacity style={styles.photoBtn} onPress={pickImage}>
+          <Text style={{ color: "#fff" }}>
+            {image ? "Zmien zdjecie" : "Dodaj zdjecie"}
+          </Text>
+        </TouchableOpacity>
+        {image ? (
+          <TouchableOpacity style={styles.photoBtnGhost} onPress={clearImage}>
+            <Text style={styles.photoGhostText}>Usun</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
       <Text style={styles.label}>Publiczny:</Text>
       <Switch
         value={isPublic}
@@ -273,5 +327,36 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 16,
     alignItems: "center",
+  },
+  photoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  photoBtn: {
+    backgroundColor: "#9DC08B",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  photoBtnGhost: {
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#9DC08B",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  photoGhostText: {
+    color: "#40513B",
+    fontWeight: "600",
+  },
+  preview: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+    marginTop: 8,
   },
 });

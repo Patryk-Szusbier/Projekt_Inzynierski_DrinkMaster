@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../components/Auth/AuthContext";
 import { useRouter } from "expo-router";
 
@@ -16,6 +17,7 @@ export default function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -55,7 +57,7 @@ export default function Login() {
             <Text style={styles.label}>Login</Text>
             <TextInput
               style={styles.input}
-              placeholder="Twój login"
+              placeholder="Twoj login"
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
@@ -63,19 +65,33 @@ export default function Login() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Hasło</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+            <Text style={styles.label}>Haslo</Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="********"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setShowPassword((v) => !v)}
+                accessibilityLabel={
+                  showPassword ? "Ukryj haslo" : "Pokaz haslo"
+                }
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#40513B"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
-
         <View style={styles.footer}>
           <TouchableOpacity
             style={[styles.button, styles.buttonPrimary]}
@@ -157,6 +173,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  inputFlex: {
+    flex: 1,
+  },
+  toggleButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#9DC08B",
+    backgroundColor: "#fff",
   },
   error: {
     color: "red",

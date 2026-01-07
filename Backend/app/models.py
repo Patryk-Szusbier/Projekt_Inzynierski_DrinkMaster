@@ -1,6 +1,7 @@
 from sqlalchemy import (
-    Column, Integer, String, Boolean, ForeignKey, Text, Enum, DECIMAL
+    Column, Integer, String, Boolean, ForeignKey, Text, Enum, DECIMAL, DateTime
 )
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .database import Base
 import enum
@@ -30,6 +31,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     email = Column(String)
     role = Column(Enum(RoleEnum), default=RoleEnum.USER)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 class Alcohol(Base):

@@ -75,3 +75,39 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 @router.get("/me", response_model=schemas.UserOut)
 def me(current: models.User = Depends(get_current_user)):
     return current
+
+@router.put("/me", response_model=schemas.UserOut)
+def update_me(
+    payload: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current: models.User = Depends(get_current_user),
+):
+    if payload.username and payload.username != current.username:
+        existing = (
+            db.query(models.User)
+            .filter(models.User.username == payload.username)
+            .first()
+        )
+        if existing:
+            raise HTTPException(status_code=400, detail="Username already taken")
+        current.username = payload.username
+
+    if payload.email is not None:
+        current.email = payload.email
+
+    db.commit()
+    db.refresh(current)
+    return current
+
+@router.put("/me/password")
+def change_password(
+    payload: schemas.UserPasswordChange,
+    db: Session = Depends(get_db),
+    current: models.User = Depends(get_current_user),
+):
+    if not verify_password(payload.current_password, current.password_hash):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+
+    current.password_hash = get_password_hash(payload.new_password)
+    db.commit()
+    return {"detail": "password updated"}

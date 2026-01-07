@@ -51,6 +51,30 @@ export async function apiMe(token: string) {
   return data;
 }
 
+export async function apiUpdateMe(
+  token: string,
+  payload: { username?: string; email?: string | null }
+) {
+  const { data } = await api.put<User>("/users/me", payload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return data;
+}
+
+export async function apiChangePassword(
+  token: string,
+  payload: { current_password: string; new_password: string }
+) {
+  const { data } = await api.put<{ detail: string }>(
+    "/users/me/password",
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return data;
+}
+
 /* ================= DRINKS ================= */
 
 export async function apiGetAvailableDrinks(token: string): Promise<Drink[]> {
