@@ -95,7 +95,7 @@ const MachineSlots: React.FC = () => {
 
   const handleSaveFiller = async (filler: MachineFiller) => {
     if (!filler.mixer_id) {
-      toast.error("Wybierz mixer przed zapisaniem!");
+      toast.error("Wybierz dodatek przed zapisaniem!");
       return;
     }
 
@@ -172,8 +172,8 @@ const MachineSlots: React.FC = () => {
                     <SelectValue placeholder="-- Typ --" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALCOHOL">Alkohol</SelectItem>
-                    <SelectItem value="MIXER">Mixer</SelectItem>
+                    <SelectItem value="ALCOHOL">Alkochol</SelectItem>
+                    <SelectItem value="MIXER">Dodatek</SelectItem>
                   </SelectContent>
                 </Select>
 

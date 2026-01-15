@@ -84,8 +84,8 @@ export default function AddComponent() {
             onChange={(e) => updateType(e.target.value as "alcohol" | "mixer")}
             className="w-full p-2 mt-1 border rounded border-acent"
           >
-            <option value="alcohol">Alcohol</option>
-            <option value="mixer">Mixer</option>
+            <option value="alcohol">Alkochol</option>
+            <option value="mixer">Dodatek</option>
           </select>
         </div>
 
@@ -128,7 +128,7 @@ export default function AddComponent() {
             >
               <option value="other">Inny</option>
               <option value="juice">Sok</option>
-              <option value="soda">Soda</option>
+              <option value="soda">Napój gazowany</option>
               <option value="syrup">Syrop</option>
             </select>
           </div>

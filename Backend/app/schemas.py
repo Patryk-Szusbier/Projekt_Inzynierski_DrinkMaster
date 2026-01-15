@@ -167,3 +167,23 @@ class MachineFillerUpdate(BaseModel):
     class Config:
         orm_mode = True
 
+
+# --- WiFi ---
+class WifiNetwork(BaseModel):
+    ssid: str
+    signal: Optional[int] = None
+    security: Optional[str] = None
+    bssid: Optional[str] = None
+    frequency: Optional[int] = None
+
+
+class WifiConnectRequest(BaseModel):
+    ssid: str
+    password: Optional[str] = None
+
+
+class WifiConnectResponse(BaseModel):
+    ssid: str
+    status: str
+    expires_in_seconds: int
+

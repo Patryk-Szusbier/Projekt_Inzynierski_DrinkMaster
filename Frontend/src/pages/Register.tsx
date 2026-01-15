@@ -12,7 +12,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { AxiosError } from "axios";
 
-// Typ odpowiedzi z backendu (przykładowy)
 interface UserOut {
   id: number;
   username: string;
@@ -21,7 +20,7 @@ interface UserOut {
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,27 +30,28 @@ const Register: React.FC = () => {
   const handleRegister = async () => {
     setError("");
     if (password !== confirmPassword) {
-      setError("Hasła nie są takie same");
+      setError("Hasla nie sa takie same");
       return;
     }
 
     setLoading(true);
     try {
       const response = await api.post<UserOut>("/users/register", {
-        username: name,
+        username,
         email,
         password,
       });
 
-      console.log("Użytkownik zarejestrowany:", response);
-      navigate("/login"); // po rejestracji przekierowanie do logowania
+      console.log("Uzytkownik zarejestrowany:", response);
+      navigate("/login");
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         setError(
-          err.response?.data?.detail || "Wystąpił błąd przy rejestracji"
+          err.response?.data?.detail ||
+            "Wystapil blad przy rejestracji"
         );
       } else {
-        setError("Wystąpił nieznany błąd");
+        setError("Wystapil nieznany blad");
       }
       console.error(err);
     } finally {
@@ -60,18 +60,17 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden text-contrast">
-      {/* Dekoracyjna linia */}
+    <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden">
       <div
-        className="absolute bottom-0 w-[900px] h-[3px] bg-main origin-bottom-left"
-        style={{ transform: "rotate(-37deg)", left: "25px", opacity: 0.4 }}
+        className="absolute bottom-0 w-screen h-[5px] bg-main origin-bottom-left"
+        style={{ transform: "rotate(-47deg)", left: "25vh", opacity: 0.5 }}
       />
 
-      <Card className="relative z-20 w-[380px] shadow-md bg-white border border-main/30 rounded-2xl">
+      <Card className="relative z-20 w-[360px] shadow-md bg-white border border-main/30 rounded-2xl">
         <CardHeader>
           <div className="flex items-center justify-center w-full">
             <div className="grow h-0.5 bg-main mr-3" />
-            <h2 className="text-2xl font-bold whitespace-nowrap">
+            <h2 className="text-2xl font-bold text-gray-800 whitespace-nowrap">
               Rejestracja
             </h2>
             <div className="grow h-0.5 bg-main ml-3" />
@@ -80,18 +79,22 @@ const Register: React.FC = () => {
 
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="name">Imię i nazwisko</Label>
+            <Label htmlFor="username" className="text-gray-700">
+              Username
+            </Label>
             <Input
-              id="name"
-              placeholder="Jan Kowalski"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="username"
+              placeholder="Twoj login"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
             />
           </div>
 
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-gray-700">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -103,11 +106,13 @@ const Register: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="password">Hasło</Label>
+            <Label htmlFor="password" className="text-gray-700">
+              Haslo
+            </Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
@@ -115,11 +120,13 @@ const Register: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="confirmPassword">Powtórz hasło</Label>
+            <Label htmlFor="confirmPassword" className="text-gray-700">
+              Powtorz haslo
+            </Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
@@ -135,14 +142,14 @@ const Register: React.FC = () => {
             onClick={handleRegister}
             disabled={loading}
           >
-            {loading ? "Rejestracja..." : "Zarejestruj się"}
+            {loading ? "Rejestracja..." : "Zarejestruj sie"}
           </Button>
           <Button
             variant="outline"
             className="w-full border-main text-main hover:bg-main/10"
             onClick={() => navigate("/login")}
           >
-            Mam już konto
+            Mam juz konto
           </Button>
         </CardFooter>
       </Card>

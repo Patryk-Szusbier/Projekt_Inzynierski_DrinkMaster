@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "@/lib/axios"; // Twój axios
+import api from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +18,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const handleLogin = async () => {
     setLoading(true);
     setError("");
@@ -31,9 +32,9 @@ const Login: React.FC = () => {
       });
 
       localStorage.setItem("token", data.access_token);
-      navigate("/main"); // przekierowanie po zalogowaniu
+      navigate("/main");
     } catch (err) {
-      setError("Nieprawidłowy login lub hasło");
+      setError("Nieprawidlowy login lub haslo");
       console.error(err);
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ const Login: React.FC = () => {
             <Input
               id="username"
               type="text"
-              placeholder="Twój login"
+              placeholder="Twoj login"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
@@ -75,12 +76,12 @@ const Login: React.FC = () => {
 
           <div>
             <Label htmlFor="password" className="text-gray-700">
-              Hasło
+              Haslo
             </Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 border-gray-300 focus:border-main focus:ring-main"
@@ -96,14 +97,14 @@ const Login: React.FC = () => {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? "Logowanie..." : "Zaloguj się"}
+            {loading ? "Logowanie..." : "Zaloguj sie"}
           </Button>
           <Button
             variant="outline"
             className="w-full border-main text-main hover:bg-main/10"
             onClick={() => navigate("/register")}
           >
-            Utwórz konto
+            Utworz konto
           </Button>
         </CardFooter>
       </Card>

@@ -3,6 +3,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MainMenu from "./pages/MainMenu";
 import MachineSlots from "./pages/Options/MachineSlots";
+import OptionsMenu from "./pages/Options/OptionsMenu";
+import WifiNetworks from "./pages/Options/WifiNetworks";
 import DefaultLayout from "./pages/Default/DefaultLayout";
 import DrinkMenu from "./pages/DrinkMenu";
 import DrinkDetails from "./pages/DrinkDetails";
@@ -33,13 +35,15 @@ const RoutesConfig = () => {
 
         {/* Chronione strony */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/main" element={<DefaultLayout />}>
-            <Route index element={<MainMenu />} />
-            <Route path="option" element={<MachineSlots />} />
-            <Route path="add" element={<AddComponent />} />
-            <Route path="drinks" element={<DrinkMenu />} />
-            <Route path="drinks/:id" element={<DrinkDetails />} />
-          </Route>
+            <Route path="/main" element={<DefaultLayout />}>
+              <Route index element={<MainMenu />} />
+              <Route path="option" element={<OptionsMenu />} />
+              <Route path="option/slots" element={<MachineSlots />} />
+              <Route path="option/wifi" element={<WifiNetworks />} />
+              <Route path="add" element={<AddComponent />} />
+              <Route path="drinks" element={<DrinkMenu />} />
+              <Route path="drinks/:id" element={<DrinkDetails />} />
+            </Route>
         </Route>
 
         {/* Domyślne przekierowanie */}
