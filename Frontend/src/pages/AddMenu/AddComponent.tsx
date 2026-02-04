@@ -48,7 +48,7 @@ export default function AddComponent() {
           volume_ml: form.volume_ml ?? 0,
           abv: form.abv ?? 0,
         };
-        await api.post(endpoint, payload);
+        await api.post(endpoint, payload, { silentError: true });
       } else {
         const payload: Omit<Mixers, "id"> = {
           name: form.name,
@@ -56,7 +56,7 @@ export default function AddComponent() {
           volume_ml: form.volume_ml ?? 0,
           type: form.mixerType ?? "other",
         };
-        await api.post(endpoint, payload);
+        await api.post(endpoint, payload, { silentError: true });
       }
 
       toast.success("Składnik dodany poprawnie!");

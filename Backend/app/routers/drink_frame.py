@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from .. import models
 from ..database import get_db
+from ..services.uart import send_frame
 
 router = APIRouter()
 
-@router.get("/drink_frame/{drink_id}")
-def get_drink_frame(drink_id: int, db: Session = Depends(get_db)):
+def build_drink_frame(drink_id: int, db: Session) -> list[int]:
     drink = (
         db.query(models.Drink)
         .options(joinedload(models.Drink.ingredients))
@@ -73,5 +73,22 @@ def get_drink_frame(drink_id: int, db: Session = Depends(get_db)):
         frame_bytes.extend([slot_number, volume_ml, 0xFF])
 
     frame_bytes.append(0xFF)
-    
-    return {"frame": list(frame_bytes)}
+
+    return list(frame_bytes)
+
+
+@router.get("/drink_frame/{drink_id}")
+def get_drink_frame(drink_id: int, db: Session = Depends(get_db)):
+    frame = build_drink_frame(drink_id, db)
+    return {"frame": frame}
+
+
+@router.post("/drink_frame/{drink_id}/send")
+def send_drink_frame(drink_id: int, db: Session = Depends(get_db)):
+    frame = build_drink_frame(drink_id, db)
+    try:
+        send_frame(bytes(frame))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return {"sent": True, "frame": frame, "length": len(frame)}

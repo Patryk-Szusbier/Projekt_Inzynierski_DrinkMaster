@@ -75,7 +75,9 @@ const MachineSlots: React.FC = () => {
         active: true,
       };
 
-      await api.put(`/ingredients/machine_slots/${slot.slot_number}`, payload);
+      await api.put(`/ingredients/machine_slots/${slot.slot_number}`, payload, {
+        silentError: true,
+      });
       toast.success(`Slot ${slot.slot_number} zapisany!`);
     } catch (err) {
       console.error(err);
@@ -108,7 +110,8 @@ const MachineSlots: React.FC = () => {
 
       await api.put(
         `/ingredients/machine_fillers/${filler.slot_number}`,
-        payload
+        payload,
+        { silentError: true }
       );
       toast.success(`Slot ${filler.slot_number} zapisany!`);
     } catch (err) {

@@ -3,6 +3,7 @@ import type { Drink } from "@/interface/IDrink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
+import { toast } from "sonner";
 
 interface IngredientLookup {
   alcohols: Record<number, string>;
@@ -18,6 +19,7 @@ const DrinkDetails: React.FC = () => {
     alcohols: {},
     mixers: {},
   });
+  const [isMixing, setIsMixing] = useState(false);
 
   // ⬇️ Pobranie tylko potrzebnych składników
   useEffect(() => {
@@ -65,6 +67,48 @@ const DrinkDetails: React.FC = () => {
       </div>
     );
   }
+
+  const isDoneResponse = (response: unknown) => {
+    if (response === "Done") return true;
+    if (typeof response !== "object" || response === null) return false;
+
+    const payload = response as {
+      status?: string;
+      message?: string;
+      done?: boolean;
+    };
+
+    return (
+      payload.done === true ||
+      payload.status === "Done" ||
+      payload.message === "Done"
+    );
+  };
+
+  const handleMix = async () => {
+    if (!drink || isMixing) return;
+    setIsMixing(true);
+
+    try {
+      const response = await api.post(
+        `/frame/drink_frame/${drink.id}/send`,
+        undefined,
+        { silentError: true }
+      );
+
+      if (isDoneResponse(response)) {
+        navigate(-1);
+        return;
+      }
+
+      toast.error("Brak potwierdzenia 'Done' z urządzenia.");
+    } catch (error) {
+      console.error("Błąd wysyłania ramki UART", error);
+      toast.error("Nie udało się wysłać ramki do urządzenia.");
+    } finally {
+      setIsMixing(false);
+    }
+  };
 
   return (
     <>
@@ -122,9 +166,10 @@ const DrinkDetails: React.FC = () => {
         <Button
           variant="outline"
           className="px-6 py-2 text-lg"
-          onClick={() => navigate(-1)}
+          onClick={handleMix}
+          disabled={isMixing}
         >
-          Miksuj
+          {isMixing ? "Miksuję..." : "Miksuj"}
         </Button>
       </div>
     </>
