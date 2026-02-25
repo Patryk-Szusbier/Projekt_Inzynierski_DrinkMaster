@@ -45,38 +45,39 @@ static const bool INVERT_X = true;
 static const bool INVERT_Z = true;
 
 // ================== MECHANICS ==================
-const float screwPitch = 4.0f; // mm/rev
+const float SCREW_PITCH_X = 4.0f; // mm/rev
+const float SCREW_PITCH_Z = 2.0f; // mm/rev
 const int motorSteps = 200;    // steps/rev
 
 // ================== STARTUP / HOMING ==================
-const unsigned long STARTUP_DELAY_MS = 30000; // set to 20000-30000 if needed
-const unsigned long HOME_TIMEOUT_MS = 20000;
+const unsigned long STARTUP_DELAY_MS = 10000; // set to 20000-30000 if needed
+const unsigned long HOME_TIMEOUT_MS = 200000;
 
 // Home direction: +1 or -1 (adjust to move toward the limit switch)
-const int HOME_DIR_X = -1;
-const int HOME_DIR_Z = -1;
+const int HOME_DIR_X = 1;
+const int HOME_DIR_Z = 1;
 
-const float HOME_SPEED_X = 600.0f;
+const float HOME_SPEED_X = 800.0f;
 const float HOME_SPEED_Z = 400.0f;
 
 // ================== POUR POSITIONS (mm from home/0) ==================
 // 1..10 (7-10 = 0)
 const float pourPositions_mm[10] = {
-  97.0f, 147.0f, 197.0f, 247.0f, 297.0f, 347.0f, 0.0f, 0.0f, 0.0f, 0.0f
+  90.0f, 140.0f, 190.0f, 240.0f, 290.0f, 340.0f, 0.0f, 0.0f, 0.0f, 0.0f
 };
 
 // ================== DOSING ==================
-const float Z_LIFT_MM = 40.0f;
+const float Z_LIFT_MM = 35.0f;
 const unsigned long Z_CYCLE_PAUSE_MS = 5000;
 const float PUMP_FLOW_ML_PER_MIN = 2000.0f;
 
 // ================== SCALE (HX711) ==================
 // NOTE: Set SCALE_CALIBRATION to match your load cell calibration.
-const float SCALE_CALIBRATION = 1.0f;
+const float SCALE_CALIBRATION = -928.29f;
 const uint8_t SCALE_SAMPLES = 10;
 const unsigned long SCALE_SETTLE_MS = 800;
-const float WEIGHT_TOLERANCE_G = 5.0f; // acceptable deviation (grams)
-const uint8_t MAX_TOPUP_ATTEMPTS = 2;
+const float WEIGHT_TOLERANCE_G = 5.0f;
+const uint8_t MAX_TOPUP_ATTEMPTS = 1;
 const uint8_t TOPUP_MIN_ML = 1;
 
 // ================== STEPPERS ==================
@@ -91,12 +92,20 @@ float posZ_mm = 0.0f;
 enum MicroMode { HALF = 2, QUARTER = 4 };
 MicroMode currentMode = QUARTER;
 
-float stepsPerMm(MicroMode mode) {
-  return (motorSteps * (int)mode) / screwPitch;
+float stepsPerMmX(MicroMode mode) {
+  return (motorSteps * (int)mode) / SCREW_PITCH_X;
 }
 
-long mmToSteps(float mm, MicroMode mode) {
-  return lround(mm * stepsPerMm(mode));
+float stepsPerMmZ(MicroMode mode) {
+  return (motorSteps * (int)mode) / SCREW_PITCH_Z;
+}
+
+long mmToStepsX(float mm, MicroMode mode) {
+  return lround(mm * stepsPerMmX(mode));
+}
+
+long mmToStepsZ(float mm, MicroMode mode) {
+  return lround(mm * stepsPerMmZ(mode));
 }
 
 static inline void relaysOffAll() {
@@ -143,8 +152,8 @@ void setMicroMode(MicroMode mode) {
 
   currentMode = mode;
 
-  stepperX.setCurrentPosition(mmToSteps(posX_mm, currentMode));
-  stepperZ.setCurrentPosition(mmToSteps(posZ_mm, currentMode));
+  stepperX.setCurrentPosition(mmToStepsX(posX_mm, currentMode));
+  stepperZ.setCurrentPosition(mmToStepsZ(posZ_mm, currentMode));
 }
 
 bool homeAxisZ() {
@@ -157,7 +166,7 @@ bool homeAxisZ() {
   }
   stepperZ.setSpeed(0);
   posZ_mm = 0.0f;
-  stepperZ.setCurrentPosition(mmToSteps(posZ_mm, currentMode));
+  stepperZ.setCurrentPosition(mmToStepsZ(posZ_mm, currentMode));
   return true;
 }
 
@@ -171,7 +180,7 @@ bool homeAxisX() {
   }
   stepperX.setSpeed(0);
   posX_mm = 0.0f;
-  stepperX.setCurrentPosition(mmToSteps(posX_mm, currentMode));
+  stepperX.setCurrentPosition(mmToStepsX(posX_mm, currentMode));
   return true;
 }
 
@@ -179,23 +188,51 @@ void moveXToPhysicalMm(float physical_mm) {
   setMicroMode(QUARTER);
   float target_mm = INVERT_X ? -physical_mm : physical_mm;
   posX_mm = target_mm;
-  stepperX.moveTo(mmToSteps(posX_mm, currentMode));
+  stepperX.moveTo(mmToStepsX(posX_mm, currentMode));
   runToStopAll();
 }
 
 void moveZRelativeMm(float physical_delta_mm) {
   setMicroMode(HALF);
-  float delta = INVERT_Z ? -physical_delta_mm : physical_delta_mm;
-  posZ_mm += delta;
-  stepperZ.moveTo(mmToSteps(posZ_mm, currentMode));
-  runToStopAll();
+  const bool movingDown = (physical_delta_mm < 0.0f);
+
+  // If we're already at Z home and command asks to move further down, ignore it.
+  if (movingDown && zHome()) {
+    posZ_mm = 0.0f;
+    stepperZ.setCurrentPosition(mmToStepsZ(posZ_mm, currentMode));
+    return;
+  }
+
+  // Convert internal position to physical mm and clamp target down movement to home (0 mm).
+  float currentPhysicalMm = INVERT_Z ? -posZ_mm : posZ_mm;
+  float targetPhysicalMm = currentPhysicalMm + physical_delta_mm;
+  if (movingDown && targetPhysicalMm < 0.0f) {
+    targetPhysicalMm = 0.0f;
+  }
+
+  float targetInternalMm = INVERT_Z ? -targetPhysicalMm : targetPhysicalMm;
+  stepperZ.moveTo(mmToStepsZ(targetInternalMm, currentMode));
+
+  while (stepperZ.distanceToGo() != 0) {
+    if (movingDown && zHome()) {
+      // Hard stop: stop generating next pulses immediately.
+      long cur = stepperZ.currentPosition();
+      stepperZ.moveTo(cur);
+      posZ_mm = 0.0f;
+      stepperZ.setCurrentPosition(mmToStepsZ(posZ_mm, currentMode));
+      return;
+    }
+    stepperZ.run();
+  }
+
+  posZ_mm = targetInternalMm;
 }
 
 void moveZToPhysicalMm(float physical_mm) {
   setMicroMode(HALF);
   float target_mm = INVERT_Z ? -physical_mm : physical_mm;
   posZ_mm = target_mm;
-  stepperZ.moveTo(mmToSteps(posZ_mm, currentMode));
+  stepperZ.moveTo(mmToStepsZ(posZ_mm, currentMode));
   runToStopAll();
 }
 
@@ -300,6 +337,7 @@ void executeFrame(PourCmd* cmds, uint8_t count) {
         if (c + 1 < cycles) delay(Z_CYCLE_PAUSE_MS);
       }
     } else {
+      moveZRelativeMm(20.0f);
       tareScale();
       switch (slot) {
         case 7: pumpRelay(RELAY_IN1, ml); break;
@@ -309,12 +347,15 @@ void executeFrame(PourCmd* cmds, uint8_t count) {
         default: break;
       }
       topUpIfNeeded(slot, ml);
+      moveZRelativeMm(-20.0f);
     }
   }
 
   // Return to position 0 after completing all commands
   moveZToPhysicalMm(0.0f);
-  moveXToPhysicalMm(0.0f);
+  if (!homeAxisX()) {
+    Serial.println("ERROR: X home timeout after pour.");
+  }
 }
 
 void setup() {
@@ -375,15 +416,15 @@ void setup() {
 
   posX_mm = 0.0f;
   posZ_mm = 0.0f;
-  stepperX.setCurrentPosition(mmToSteps(posX_mm, currentMode));
-  stepperZ.setCurrentPosition(mmToSteps(posZ_mm, currentMode));
+  stepperX.setCurrentPosition(mmToStepsX(posX_mm, currentMode));
+  stepperZ.setCurrentPosition(mmToStepsZ(posZ_mm, currentMode));
 
   Serial.println("\n=== X/Z move: X=1/4, Z=1/2 (shared MS, sequential move) ===");
   Serial.println("Waiting for UART frame...");
 }
 
 void loop() {
-  static PourCmd cmds[10];
+  static PourCmd cmds[10]; 
   static uint8_t cmdCount = 0;
   static bool prevWasSep = false;
   static uint8_t state = 0; // 0=WAIT_SLOT, 1=WAIT_ML, 2=WAIT_SEP

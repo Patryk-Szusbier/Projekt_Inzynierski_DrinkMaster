@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { AxiosError } from "axios";
+import { sanitizeVirtualKeyboardInput } from "@/lib/inputSanitizer";
 
 interface UserOut {
   id: number;
@@ -28,8 +29,14 @@ const Register: React.FC = () => {
   const [error, setError] = useState("");
 
   const handleRegister = async () => {
+    const normalizedUsername = sanitizeVirtualKeyboardInput(username).trim();
+    const normalizedEmail = sanitizeVirtualKeyboardInput(email).trim();
+    const normalizedPassword = sanitizeVirtualKeyboardInput(password);
+    const normalizedConfirmPassword =
+      sanitizeVirtualKeyboardInput(confirmPassword);
+
     setError("");
-    if (password !== confirmPassword) {
+    if (normalizedPassword !== normalizedConfirmPassword) {
       setError("Hasla nie sa takie same");
       return;
     }
@@ -37,9 +44,9 @@ const Register: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.post<UserOut>("/users/register", {
-        username,
-        email,
-        password,
+        username: normalizedUsername,
+        email: normalizedEmail,
+        password: normalizedPassword,
       });
 
       console.log("Uzytkownik zarejestrowany:", response);

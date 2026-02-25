@@ -21,7 +21,6 @@ const DrinkDetails: React.FC = () => {
   });
   const [isMixing, setIsMixing] = useState(false);
 
-  // ⬇️ Pobranie tylko potrzebnych składników
   useEffect(() => {
     const fetchIngredients = async () => {
       if (!drink) return;
@@ -53,7 +52,7 @@ const DrinkDetails: React.FC = () => {
           mixers: Object.fromEntries(mixers.map((m) => [m.id, m.name])),
         });
       } catch (error) {
-        console.error("Błąd pobierania składników", error);
+        console.error("Blad pobierania skladnikow", error);
       }
     };
 
@@ -63,48 +62,26 @@ const DrinkDetails: React.FC = () => {
   if (!drink) {
     return (
       <div className="text-center text-contrast font-medium mt-20">
-        Nie znaleziono danych drinka 🥺
+        Nie znaleziono danych drinka
       </div>
     );
   }
-
-  const isDoneResponse = (response: unknown) => {
-    if (response === "Done") return true;
-    if (typeof response !== "object" || response === null) return false;
-
-    const payload = response as {
-      status?: string;
-      message?: string;
-      done?: boolean;
-    };
-
-    return (
-      payload.done === true ||
-      payload.status === "Done" ||
-      payload.message === "Done"
-    );
-  };
 
   const handleMix = async () => {
     if (!drink || isMixing) return;
     setIsMixing(true);
 
     try {
-      const response = await api.post(
-        `/frame/drink_frame/${drink.id}/send`,
-        undefined,
-        { silentError: true }
-      );
+      await api.post(`/frame/drink_frame/${drink.id}/send`, undefined, {
+        silentError: true,
+        timeout: 70000,
+      });
 
-      if (isDoneResponse(response)) {
-        navigate(-1);
-        return;
-      }
-
-      toast.error("Brak potwierdzenia 'Done' z urządzenia.");
+      // Backend zwraca blad 500, gdy UART nie potwierdzi, wiec 2xx traktujemy jako sukces.
+      navigate(-1);
     } catch (error) {
-      console.error("Błąd wysyłania ramki UART", error);
-      toast.error("Nie udało się wysłać ramki do urządzenia.");
+      console.error("Blad wysylania ramki UART", error);
+      toast.error("Nie udalo sie wyslac ramki do urzadzenia.");
     } finally {
       setIsMixing(false);
     }
@@ -112,14 +89,11 @@ const DrinkDetails: React.FC = () => {
 
   return (
     <>
-      {/* Tło */}
       <div className="relative w-screen h-screen aspect-5/3">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${import.meta.env.VITE_API_URL}/drinkPhotos/${
-              drink.image_url
-            })`,
+            backgroundImage: `url(${import.meta.env.VITE_API_URL}/drinkPhotos/${drink.image_url})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             clipPath: "polygon(0% 7%, 93% 7%, 40% 100%, 0% 100%)",
@@ -129,12 +103,9 @@ const DrinkDetails: React.FC = () => {
         />
       </div>
 
-      {/* Skośna linia */}
       <div className="absolute left-40 bottom-0 w-screen h-[5px] bg-main rotate-315 origin-bottom-left z-20" />
 
-      {/* Prawa strona */}
       <div className="absolute right-12 top-32 flex flex-col space-y-5 w-[480px] z-10">
-        {/* Nazwa */}
         <div className="flex items-center justify-center w-full">
           <div className="grow h-1 bg-main mr-4" />
           <span className="text-4xl font-semibold whitespace-nowrap text-center">
@@ -143,8 +114,8 @@ const DrinkDetails: React.FC = () => {
           <div className="grow h-1 bg-main ml-4" />
         </div>
         <span className="italic text-lg mt-2">{drink.description}</span>
-        {/* Skład */}
-        <div className="text-2xl font-medium">Skład:</div>
+
+        <div className="text-2xl font-medium">Sklad:</div>
         <ul className="list-none space-y-2 text-left text-xl">
           {drink.ingredients.map((item, i) => {
             const name =
@@ -154,14 +125,13 @@ const DrinkDetails: React.FC = () => {
 
             return (
               <li key={i}>
-                <b>{name || "?"}</b> – {item.amount_ml}ml
+                <b>{name || "?"}</b> - {item.amount_ml}ml
               </li>
             );
           })}
         </ul>
       </div>
 
-      {/* Przycisk */}
       <div className="absolute bottom-44 right-28 z-40">
         <Button
           variant="outline"
@@ -169,7 +139,7 @@ const DrinkDetails: React.FC = () => {
           onClick={handleMix}
           disabled={isMixing}
         >
-          {isMixing ? "Miksuję..." : "Miksuj"}
+          {isMixing ? "Miksuje..." : "Miksuj"}
         </Button>
       </div>
     </>

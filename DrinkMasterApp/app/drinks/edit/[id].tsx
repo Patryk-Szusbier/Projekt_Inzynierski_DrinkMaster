@@ -22,6 +22,7 @@ import type {
 import type { Alcohol, Mixers } from "@/interface/IIngredientl";
 import { getToken } from "@/lib/authStorage";
 import { apiGetDrinkById, apiUpdateDrink } from "@/lib/api";
+import { buildApiUrl } from "@/lib/serverDiscovery";
 
 export default function EditDrink() {
   const router = useRouter();
@@ -55,10 +56,10 @@ export default function EditDrink() {
 
       // Pobranie składników
       const [alcoholList, mixerList] = await Promise.all([
-        fetch(`${process.env.EXPO_PUBLIC_API_URL}/ingredients/alcohols`).then(
+        fetch(buildApiUrl("/ingredients/alcohols")).then(
           (r) => r.json()
         ) as Promise<Alcohol[]>,
-        fetch(`${process.env.EXPO_PUBLIC_API_URL}/ingredients/mixers`).then(
+        fetch(buildApiUrl("/ingredients/mixers")).then(
           (r) => r.json()
         ) as Promise<Mixers[]>,
       ]);
@@ -178,7 +179,7 @@ export default function EditDrink() {
       ) : drink?.image_url ? (
         <Image
           source={{
-            uri: `${process.env.EXPO_PUBLIC_API_URL}/drinkPhotos/${drink.image_url}`,
+            uri: buildApiUrl(`/drinkPhotos/${drink.image_url}`),
           }}
           style={styles.preview}
         />

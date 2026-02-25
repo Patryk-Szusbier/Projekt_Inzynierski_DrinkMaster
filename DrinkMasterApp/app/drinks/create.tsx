@@ -18,6 +18,7 @@ import type { DrinkIngredient, IngredientType } from "@/interface/iDrink";
 import type { Alcohol, Mixers } from "@/interface/IIngredientl";
 import { getToken } from "@/lib/authStorage";
 import { apiCreateDrink } from "@/lib/api";
+import { buildApiUrl } from "@/lib/serverDiscovery";
 
 export default function CreateDrink() {
   const router = useRouter();
@@ -42,10 +43,10 @@ export default function CreateDrink() {
   const loadIngredients = async () => {
     try {
       const [alcoholList, mixerList] = await Promise.all([
-        fetch(`${process.env.EXPO_PUBLIC_API_URL}/ingredients/alcohols`).then(
+        fetch(buildApiUrl("/ingredients/alcohols")).then(
           (r) => r.json()
         ) as Promise<Alcohol[]>,
-        fetch(`${process.env.EXPO_PUBLIC_API_URL}/ingredients/mixers`).then(
+        fetch(buildApiUrl("/ingredients/mixers")).then(
           (r) => r.json()
         ) as Promise<Mixers[]>,
       ]);

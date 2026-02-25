@@ -125,6 +125,17 @@ def scan_wifi_networks() -> List[schemas.WifiNetwork]:
     return sorted(networks, key=lambda n: n.signal or 0, reverse=True)
 
 
+def _choose_key_mgmt(security: str | None) -> str | None:
+    if not security:
+        return None
+    sec = security.upper()
+    if "SAE" in sec or "WPA3" in sec:
+        return "sae"
+    if "WPA" in sec:
+        return "wpa-psk"
+    return None
+
+
 def _run_nmcli(args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["nmcli", *args],
@@ -185,7 +196,23 @@ def connect_wifi(
     if payload.password:
         args += ["password", payload.password]
 
+    security = None
+    for network in scan_wifi_networks():
+        if network.ssid == payload.ssid:
+            security = network.security
+            break
+
+    key_mgmt = _choose_key_mgmt(security)
+    if key_mgmt:
+        args += ["wifi-sec.key-mgmt", key_mgmt]
+
     result = _run_nmcli(args)
+    if result.returncode != 0 and key_mgmt:
+        # Retry without forcing key-mgmt to allow NetworkManager auto-detection.
+        fallback_args = ["dev", "wifi", "connect", payload.ssid]
+        if payload.password:
+            fallback_args += ["password", payload.password]
+        result = _run_nmcli(fallback_args)
     if result.returncode != 0:
         detail = result.stderr.strip() or "WiFi connection failed"
         raise HTTPException(status_code=400, detail=detail)

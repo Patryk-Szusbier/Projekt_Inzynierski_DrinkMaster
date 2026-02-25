@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { Drink } from "@/interface/iDrink";
 import { apiDeleteDrink, apiGetMyDrinks } from "@/lib/api";
 import { getToken } from "@/lib/authStorage";
+import { buildApiUrl } from "@/lib/serverDiscovery";
 
 export default function MyDrinksMenu() {
   const router = useRouter();
@@ -104,7 +105,7 @@ export default function MyDrinksMenu() {
           >
             <Image
               source={{
-                uri: `${process.env.EXPO_PUBLIC_API_URL}/drinkPhotos/${item.image_url}`,
+                uri: buildApiUrl(`/drinkPhotos/${item.image_url}`),
               }}
               style={styles.image}
             />

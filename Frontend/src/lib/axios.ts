@@ -14,18 +14,41 @@ const instance = axios.create({
   timeout: 10000,
 });
 
+const normalizeBodyMessage = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+
+  if (Array.isArray(value)) {
+    const fromItems = value
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "msg" in item) {
+          const msg = (item as { msg?: unknown }).msg;
+          return typeof msg === "string" ? msg : null;
+        }
+        return null;
+      })
+      .filter((msg): msg is string => Boolean(msg));
+    return fromItems.length ? fromItems.join(", ") : null;
+  }
+
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.message === "string") return obj.message;
+    if (typeof obj.error === "string") return obj.error;
+    if (typeof obj.detail === "string") return obj.detail;
+
+    const nestedDetail = normalizeBodyMessage(obj.detail);
+    if (nestedDetail) return nestedDetail;
+  }
+
+  return null;
+};
+
 const getErrorMessage = (error: AxiosError | Error) => {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
-    const data = error.response?.data as
-      | { message?: string; error?: string; detail?: string }
-      | string
-      | undefined;
-
-    const fromBody =
-      typeof data === "string"
-        ? data
-        : data?.message || data?.error || data?.detail;
+    const fromBody = normalizeBodyMessage(error.response?.data);
 
     if (fromBody) return fromBody;
     if (error.code === "ECONNABORTED") {

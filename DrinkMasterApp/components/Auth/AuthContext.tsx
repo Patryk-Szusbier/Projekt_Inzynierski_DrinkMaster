@@ -3,6 +3,7 @@ import { apiLogin, apiMe } from "../../lib/api";
 import { getToken, saveToken, clearToken } from "../../lib/authStorage";
 import { useRouter } from "expo-router";
 import type { User } from "@/interface/IUser";
+import { ensureApiBaseUrl } from "@/lib/serverDiscovery";
 
 type AuthContextType = {
   user: User | null;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function restoreSession() {
     try {
+      await ensureApiBaseUrl();
       const token = await getToken();
       if (!token) return;
 
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(username: string, password: string) {
     try {
+      await ensureApiBaseUrl();
       const { access_token } = await apiLogin(username, password);
       await saveToken(access_token);
 

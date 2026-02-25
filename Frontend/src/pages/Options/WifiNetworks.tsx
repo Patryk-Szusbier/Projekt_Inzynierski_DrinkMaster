@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { WifiNetwork } from "@/interface/IWifiNetwork";
+import { sanitizeVirtualKeyboardInput } from "@/lib/inputSanitizer";
 
 const WifiNetworks: React.FC = () => {
   const [networks, setNetworks] = useState<WifiNetwork[]>([]);
@@ -58,12 +59,13 @@ const WifiNetworks: React.FC = () => {
     if (!selectedNetwork?.ssid) {
       return;
     }
+    const normalizedPassword = sanitizeVirtualKeyboardInput(password);
     setConnecting(true);
     setConnectMessage(null);
     try {
       await api.post("/wifi/connect", {
         ssid: selectedNetwork.ssid,
-        password: password || undefined,
+        password: normalizedPassword || undefined,
       });
       setConnectMessage("Polaczono. Siec bedzie zapamietana przez 12h.");
     } catch (err) {

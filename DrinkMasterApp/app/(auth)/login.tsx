@@ -30,7 +30,12 @@ export default function Login() {
       router.replace("/(tabs)");
     } catch (e: any) {
       console.error(e);
-      setError("Nieprawidłowy login lub hasło");
+      const message = String(e?.message || "");
+      if (message.includes("Nie znaleziono serwera DrinkMaster")) {
+        setError(message);
+      } else {
+        setError("Nieprawidlowy login lub haslo");
+      }
     } finally {
       setLoading(false);
     }
@@ -221,3 +226,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+

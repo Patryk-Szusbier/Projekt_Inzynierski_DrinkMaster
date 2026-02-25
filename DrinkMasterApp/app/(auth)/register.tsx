@@ -9,8 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { buildApiUrl, ensureApiBaseUrl } from "@/lib/serverDiscovery";
 
 export default function Register() {
   const router = useRouter();
@@ -35,7 +34,8 @@ export default function Register() {
     setError("");
 
     try {
-      const res = await fetch(`${API_URL}/users/register`, {
+      await ensureApiBaseUrl();
+      const res = await fetch(buildApiUrl("/users/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

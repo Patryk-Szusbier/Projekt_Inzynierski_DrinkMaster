@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Drink, DrinkIngredient } from "../../interface/iDrink";
 import { apiFetchIngredients } from "../../lib/api";
+import { buildApiUrl } from "@/lib/serverDiscovery";
 
 interface IngredientLookup {
   alcohols: Record<number, string>;
@@ -25,12 +27,13 @@ export default function DrinkDetails() {
     mixers: {},
   });
   const [loading, setLoading] = useState(true);
+  const [isMixing, setIsMixing] = useState(false);
 
   useEffect(() => {
     const fetchDrink = async () => {
       try {
         const res = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/drinks/${id}`
+          buildApiUrl(`/drinks/${id}`)
         );
         if (!res.ok) throw new Error("Nie udało się pobrać drinka");
         const data: Drink = await res.json();
@@ -54,6 +57,37 @@ export default function DrinkDetails() {
 
     fetchDrink();
   }, [id]);
+
+  const handleMix = async () => {
+    if (!id || isMixing) return;
+    setIsMixing(true);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 70000);
+
+    try {
+      const res = await fetch(buildApiUrl(`/frame/drink_frame/${id}/send`), {
+        method: "POST",
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+
+      router.back();
+    } catch (err: any) {
+      console.error("Blad wysylania ramki UART:", err);
+      Alert.alert(
+        "Blad",
+        "Nie udalo sie wyslac ramki do urzadzenia. Sprobuj ponownie."
+      );
+    } finally {
+      clearTimeout(timeout);
+      setIsMixing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -87,7 +121,7 @@ export default function DrinkDetails() {
       {drink.image_url && (
         <ImageBackground
           source={{
-            uri: `${process.env.EXPO_PUBLIC_API_URL}/drinkPhotos/${drink.image_url}`,
+            uri: buildApiUrl(`/drinkPhotos/${drink.image_url}`),
           }}
           style={styles.image}
           imageStyle={{ borderRadius: 20 }}
@@ -120,8 +154,14 @@ export default function DrinkDetails() {
       </View>
 
       {/* Przycisk Miksuj */}
-      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-        <Text style={styles.buttonText}>Miksuj</Text>
+      <TouchableOpacity
+        style={[styles.button, isMixing && styles.buttonDisabled]}
+        onPress={handleMix}
+        disabled={isMixing}
+      >
+        <Text style={styles.buttonText}>
+          {isMixing ? "Mieszanie..." : "Miksuj"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -202,6 +242,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     marginHorizontal: 30,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: "#fff",

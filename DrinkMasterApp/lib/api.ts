@@ -1,16 +1,19 @@
 import axios from "axios";
 import type { Drink, DrinkIngredient } from "@/interface/iDrink";
 import { User } from "@/interface/IUser";
+import { buildApiUrl, getApiBaseUrl } from "@/lib/serverDiscovery";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error("EXPO_PUBLIC_API_URL is not defined");
-}
-
-// Tworzymy instancję axios z baseURL
 const api = axios.create({
-  baseURL: API_URL,
+  timeout: 10000,
+});
+
+api.interceptors.request.use((config) => {
+  const baseURL = getApiBaseUrl();
+  if (!baseURL) {
+    throw new Error("API base URL is not configured");
+  }
+  config.baseURL = baseURL;
+  return config;
 });
 
 /* ================= AUTH ================= */
@@ -142,7 +145,7 @@ export async function apiFetchIngredients(
   };
 }
 export async function apiGetMyDrinks(token: string) {
-  const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/drinks/my`, {
+  const res = await fetch(buildApiUrl("/drinks/my"), {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -223,7 +226,7 @@ export async function apiCreateDrink(
     } as any);
   }
 
-  const res = await fetch(`${API_URL}/drinks/`, {
+  const res = await fetch(buildApiUrl("/drinks/"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

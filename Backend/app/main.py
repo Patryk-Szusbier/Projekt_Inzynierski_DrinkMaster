@@ -49,3 +49,8 @@ app.include_router(wifi.router, prefix="/wifi", tags=["wifi"])
 @app.get("/")
 def read_root():
     return {"message": "DrinkMachine API is running!"}
+
+
+@app.get("/health")
+def health():
+    return {"ok": True, "service": "DrinkMachine API"}
