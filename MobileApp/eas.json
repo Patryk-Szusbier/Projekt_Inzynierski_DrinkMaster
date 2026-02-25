@@ -1,0 +1,13 @@
+{
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://raspberrypi.local:8000",
+        "EXPO_PUBLIC_ENV": "development"
+      }
+    }
+  }
+}
